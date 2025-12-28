@@ -1,0 +1,49 @@
+# Go binaries
+sleepless.exe
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+.opencode/
+AGENTS.md
+node_modules/
+openspec/
+package-lock.json
+package.json
+
+# Test binary
+*.test
+
+# Output of go coverage
+*.out
+
+# Go workspace
+go.work
+
+# Vendor directory
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python (legacy, to be removed)
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+.mypy_cache/

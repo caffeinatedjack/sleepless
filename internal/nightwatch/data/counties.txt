@@ -1,0 +1,47 @@
+# UK counties and regions
+Greater London
+West Midlands
+Greater Manchester
+West Yorkshire
+South Yorkshire
+Merseyside
+Tyne and Wear
+Hampshire
+Kent
+Essex
+Surrey
+Hertfordshire
+Lancashire
+Devon
+Norfolk
+Suffolk
+Nottinghamshire
+Leicestershire
+Derbyshire
+Cambridgeshire
+Oxfordshire
+Gloucestershire
+Wiltshire
+Somerset
+Dorset
+Cornwall
+Northamptonshire
+Warwickshire
+Worcestershire
+Staffordshire
+Cheshire
+Shropshire
+Lincolnshire
+North Yorkshire
+East Yorkshire
+Cumbria
+Durham
+Northumberland
+Berkshire
+Buckinghamshire
+Bedfordshire
+East Sussex
+West Sussex
+Scotland
+Wales
+Northern Ireland

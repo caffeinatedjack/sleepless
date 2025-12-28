@@ -1,0 +1,31 @@
+# Countries (UK-centric list with trading partners)
+United Kingdom
+Ireland
+France
+Germany
+Netherlands
+Belgium
+Spain
+Italy
+Portugal
+Poland
+Sweden
+Norway
+Denmark
+Finland
+Switzerland
+Austria
+Greece
+Czech Republic
+Hungary
+Romania
+United States
+Canada
+Australia
+New Zealand
+Japan
+China
+India
+South Africa
+Brazil
+Mexico

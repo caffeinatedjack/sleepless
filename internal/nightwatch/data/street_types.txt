@@ -1,0 +1,21 @@
+# UK street type suffixes
+Street
+Road
+Lane
+Avenue
+Close
+Drive
+Way
+Gardens
+Place
+Terrace
+Crescent
+Court
+Mews
+Square
+Walk
+Rise
+View
+Park
+Grove
+Row
