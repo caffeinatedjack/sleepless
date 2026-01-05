@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"syscall"
 	"time"
 
 	"gitlab.com/caffeinatedjack/sleepless/pkg/parser"
@@ -252,8 +251,8 @@ func (s *Storage) writeTasksLocked(path string, tasks []*task.Task, topic string
 	}
 	defer file.Close()
 
-	syscall.Flock(int(file.Fd()), syscall.LOCK_EX)
-	defer syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	lockFile(file.Fd())
+	defer unlockFile(file.Fd())
 
 	return parser.WriteMarkdownTo(file, tasks, topic)
 }
@@ -517,8 +516,8 @@ func (s *Storage) saveMeta(meta *Meta) error {
 	}
 	defer file.Close()
 
-	syscall.Flock(int(file.Fd()), syscall.LOCK_EX)
-	defer syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	lockFile(file.Fd())
+	defer unlockFile(file.Fd())
 
 	data, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {

@@ -40,6 +40,7 @@ test:
   extends: .go-cache
   script:
     - go mod download
+    - mkdir -p dist
     - |
       export VERSION="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}"
       export BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -49,11 +50,14 @@ test:
       echo "Version: ${VERSION}"
       echo "Build Time: ${BUILD_TIME}"
       
-      # Build regimen
-      go build -ldflags "${LDFLAGS}" -o "dist/regimen${EXT}" ./cmd/regimen
+      # Build regimen with platform suffix
+      go build -ldflags "${LDFLAGS}" -o "dist/regimen-${GOOS}-${GOARCH}${EXT}" ./cmd/regimen
       
-      # Build nightwatch
-      go build -ldflags "${LDFLAGS}" -o "dist/nightwatch${EXT}" ./cmd/nightwatch
+      # Build nightwatch with platform suffix
+      go build -ldflags "${LDFLAGS}" -o "dist/nightwatch-${GOOS}-${GOARCH}${EXT}" ./cmd/nightwatch
+      
+      # Show built artifacts
+      ls -la dist/
   artifacts:
     paths:
       - dist/
@@ -68,8 +72,6 @@ build:linux-amd64:
     GOOS: linux
     GOARCH: amd64
     EXT: ""
-  after_script:
-    - cd dist && mv regimen regimen-linux-amd64 && mv nightwatch nightwatch-linux-amd64
 
 # Linux arm64 build
 build:linux-arm64:
@@ -78,8 +80,6 @@ build:linux-arm64:
     GOOS: linux
     GOARCH: arm64
     EXT: ""
-  after_script:
-    - cd dist && mv regimen regimen-linux-arm64 && mv nightwatch nightwatch-linux-arm64
 
 # Windows amd64 build
 build:windows-amd64:
@@ -88,8 +88,6 @@ build:windows-amd64:
     GOOS: windows
     GOARCH: amd64
     EXT: ".exe"
-  after_script:
-    - cd dist && mv regimen.exe regimen-windows-amd64.exe && mv nightwatch.exe nightwatch-windows-amd64.exe
 
 # Windows arm64 build
 build:windows-arm64:
@@ -98,8 +96,6 @@ build:windows-arm64:
     GOOS: windows
     GOARCH: arm64
     EXT: ".exe"
-  after_script:
-    - cd dist && mv regimen.exe regimen-windows-arm64.exe && mv nightwatch.exe nightwatch-windows-arm64.exe
 
 # Create GitLab release with all artifacts
 release:
