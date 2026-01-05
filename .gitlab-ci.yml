@@ -1,0 +1,154 @@
+stages:
+  - test
+  - build
+  - release
+
+variables:
+  # Use the Go version from go.mod
+  GO_VERSION: "1.21"
+
+# Default image for Go jobs
+default:
+  image: golang:${GO_VERSION}
+
+# Cache Go modules between jobs
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .go/pkg/mod/
+
+# Test job runs on all branches and tags
+test:
+  stage: test
+  extends: .go-cache
+  script:
+    - go mod download
+    - go fmt ./... && git diff --exit-code
+    - go vet ./...
+    - go test -v -race ./...
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+# Build template for cross-compilation
+.build:
+  stage: build
+  extends: .go-cache
+  script:
+    - go mod download
+    - |
+      export VERSION="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}"
+      export BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+      export LDFLAGS="-X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME}"
+      
+      echo "Building for ${GOOS}/${GOARCH}..."
+      echo "Version: ${VERSION}"
+      echo "Build Time: ${BUILD_TIME}"
+      
+      # Build regimen
+      go build -ldflags "${LDFLAGS}" -o "dist/regimen${EXT}" ./cmd/regimen
+      
+      # Build nightwatch
+      go build -ldflags "${LDFLAGS}" -o "dist/nightwatch${EXT}" ./cmd/nightwatch
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_TAG
+
+# Linux amd64 build
+build:linux-amd64:
+  extends: .build
+  variables:
+    GOOS: linux
+    GOARCH: amd64
+    EXT: ""
+  after_script:
+    - cd dist && mv regimen regimen-linux-amd64 && mv nightwatch nightwatch-linux-amd64
+
+# Linux arm64 build
+build:linux-arm64:
+  extends: .build
+  variables:
+    GOOS: linux
+    GOARCH: arm64
+    EXT: ""
+  after_script:
+    - cd dist && mv regimen regimen-linux-arm64 && mv nightwatch nightwatch-linux-arm64
+
+# Windows amd64 build
+build:windows-amd64:
+  extends: .build
+  variables:
+    GOOS: windows
+    GOARCH: amd64
+    EXT: ".exe"
+  after_script:
+    - cd dist && mv regimen.exe regimen-windows-amd64.exe && mv nightwatch.exe nightwatch-windows-amd64.exe
+
+# Windows arm64 build
+build:windows-arm64:
+  extends: .build
+  variables:
+    GOOS: windows
+    GOARCH: arm64
+    EXT: ".exe"
+  after_script:
+    - cd dist && mv regimen.exe regimen-windows-arm64.exe && mv nightwatch.exe nightwatch-windows-arm64.exe
+
+# Create GitLab release with all artifacts
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - build:linux-amd64
+    - build:linux-arm64
+    - build:windows-amd64
+    - build:windows-arm64
+  script:
+    - echo "Creating release for ${CI_COMMIT_TAG}"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Release $CI_COMMIT_TAG"
+    description: "Release $CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: "regimen-linux-amd64"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/regimen-linux-amd64"
+          filepath: "/binaries/regimen-linux-amd64"
+          link_type: "other"
+        - name: "regimen-linux-arm64"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/regimen-linux-arm64"
+          filepath: "/binaries/regimen-linux-arm64"
+          link_type: "other"
+        - name: "regimen-windows-amd64.exe"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/regimen-windows-amd64.exe"
+          filepath: "/binaries/regimen-windows-amd64.exe"
+          link_type: "other"
+        - name: "regimen-windows-arm64.exe"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/regimen-windows-arm64.exe"
+          filepath: "/binaries/regimen-windows-arm64.exe"
+          link_type: "other"
+        - name: "nightwatch-linux-amd64"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/nightwatch-linux-amd64"
+          filepath: "/binaries/nightwatch-linux-amd64"
+          link_type: "other"
+        - name: "nightwatch-linux-arm64"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/nightwatch-linux-arm64"
+          filepath: "/binaries/nightwatch-linux-arm64"
+          link_type: "other"
+        - name: "nightwatch-windows-amd64.exe"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/nightwatch-windows-amd64.exe"
+          filepath: "/binaries/nightwatch-windows-amd64.exe"
+          link_type: "other"
+        - name: "nightwatch-windows-arm64.exe"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/nightwatch-windows-arm64.exe"
+          filepath: "/binaries/nightwatch-windows-arm64.exe"
+          link_type: "other"
+  rules:
+    - if: $CI_COMMIT_TAG
