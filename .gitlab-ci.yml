@@ -82,7 +82,7 @@ implement:
     - npm i -g opencode-ai
     # Install nocturnal CLI from GitLab releases
     - |
-      curl -fsSL "https://gitlab.com/caffeinatedjack/nocturnal/-/releases/v${NOCTURNAL_VERSION}/downloads/nocturnal-linux-amd64" \
+      curl -fsSL "https://gitlab.com/caffeinatedjack/nocturnal/-/jobs/12753481837/artifacts/file/nocturnal-linux-amd64" \
         -o /usr/local/bin/nocturnal
       chmod +x /usr/local/bin/nocturnal
     # Configure git for commits
