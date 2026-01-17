@@ -107,27 +107,19 @@ implement:
       Source branch: ${CI_COMMIT_REF_NAME}
       Commit: ${CI_COMMIT_SHA}"
       
-      # Push the branch
-      git push "https://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "$BRANCH_NAME"
-      
-      # Create merge request using GitLab API
-      curl --fail --request POST \
-        --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-        --header "Content-Type: application/json" \
-        --data "{
-          \"source_branch\": \"${BRANCH_NAME}\",
-          \"target_branch\": \"${CI_COMMIT_REF_NAME}\",
-          \"title\": \"[OpenCode] Implement active proposal\",
-          \"description\": \"## Automated Implementation\\n\\nThis MR was created by OpenCode lazy implementation.\\n\\n- **Pipeline**: #${CI_PIPELINE_ID}\\n- **Source commit**: ${CI_COMMIT_SHA}\\n- **Triggered by**: ${GITLAB_USER_LOGIN:-manual}\\n\\nPlease review the changes before merging.\",
-          \"remove_source_branch\": true
-        }" \
-        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests"
+      # Push the branch and create merge request using push options
+      git push \
+        -o merge_request.create \
+        -o merge_request.target="${CI_COMMIT_REF_NAME}" \
+        -o merge_request.title="[OpenCode] Implement active proposal" \
+        -o merge_request.remove_source_branch \
+        "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" \
+        "$BRANCH_NAME"
       
       echo "Merge request created successfully"
   rules:
     - if: $CI_COMMIT_BRANCH
       when: manual
-      allow_failure: true
 
 
 # Linux amd64 build
