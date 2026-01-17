@@ -78,7 +78,7 @@ implement:
     GIT_DEPTH: 0
   before_script:
     # Install opencode CLI
-    - npm install -g opencode
+    - npm i -g opencode-ai
     # Configure git for commits
     - git config user.email "opencode-bot@gitlab.local"
     - git config user.name "OpenCode Bot"
