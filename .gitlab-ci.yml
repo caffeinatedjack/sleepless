@@ -76,9 +76,15 @@ implement:
   variables:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0
+    NOCTURNAL_VERSION: "0.1.0"
   before_script:
     # Install opencode CLI
     - npm i -g opencode-ai
+    # Install nocturnal CLI from GitLab releases
+    - |
+      curl -fsSL "https://gitlab.com/caffeinatedjack/nocturnal/-/releases/v${NOCTURNAL_VERSION}/downloads/nocturnal-linux-amd64" \
+        -o /usr/local/bin/nocturnal
+      chmod +x /usr/local/bin/nocturnal
     # Configure git for commits
     - git config user.email "opencode-bot@gitlab.local"
     - git config user.name "OpenCode Bot"
