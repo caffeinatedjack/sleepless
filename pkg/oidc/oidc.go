@@ -103,8 +103,8 @@ func BuildAuthURL(authEndpoint, clientID, redirectURI, scope string, opts AuthUR
 	if opts.Nonce != "" {
 		query.Set("nonce", opts.Nonce)
 	}
-	if opts.PKCEVerifier != "" {
-		query.Set("code_challenge", opts.PKCEVerifier)
+	if opts.PKCEChallenge != "" {
+		query.Set("code_challenge", opts.PKCEChallenge)
 		query.Set("code_challenge_method", "S256")
 	}
 
@@ -114,9 +114,9 @@ func BuildAuthURL(authEndpoint, clientID, redirectURI, scope string, opts AuthUR
 
 // AuthURLOptions represents optional parameters for BuildAuthURL.
 type AuthURLOptions struct {
-	State        string
-	Nonce        string
-	PKCEVerifier string
+	State         string
+	Nonce         string
+	PKCEChallenge string
 }
 
 // ParseCallback parses an authorization callback URL and extracts relevant parameters.

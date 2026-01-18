@@ -17,8 +17,8 @@ Add an offline `nightwatch oidc` command group with PKCE generation, authorizati
 
 **Goal**: Implement reusable helpers.
 
-- [ ] Add `pkg/oidc` for PKCE and URL parsing/building.
-- [ ] Add unit tests for PKCE, auth URL, callback parsing.
+- [x] Add `pkg/oidc` for PKCE and URL parsing/building.
+- [x] Add unit tests for PKCE, auth URL, callback parsing.
 
 **Milestone**: `go test ./...` passes with new packages.
 
@@ -26,9 +26,9 @@ Add an offline `nightwatch oidc` command group with PKCE generation, authorizati
 
 **Goal**: Wire commands and outputs.
 
-- [ ] Add `internal/nightwatch/oidc.go` Cobra commands: `pkce`, `state`, `nonce`, `auth-url`, `callback`, `idtoken decode|lint`.
-- [ ] Implement stdin token input for ID token commands.
-- [ ] Implement `--json` output.
+- [x] Add `internal/nightwatch/oidc.go` Cobra commands: `pkce`, `state`, `nonce`, `auth-url`, `callback`, `idtoken decode|lint`.
+- [x] Implement stdin token input for ID token commands.
+- [x] Implement `--json` output.
 
 **Milestone**: Manual runs produce correct outputs for sample tokens and URLs.
 

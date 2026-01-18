@@ -1,14 +1,5 @@
 {
   "version": 1,
-  "active": [
-    "nightwatch-oidc"
-  ],
-  "primary": "nightwatch-oidc",
-  "hashes": {
-    "nightwatch-oidc": {
-      "design.md": "0c2366d9f4faf1ace8eadc886cb57e236dcd753191eac3edb9c30b509ca55139",
-      "implementation.md": "93f1b6d52cd92d7dce7dfe4b08016a26cf7fe0817983ed8c3da79ee2a4914c42",
-      "specification.md": "51f8ed20c9cade3f8fde29f28508fd91318cf89058d5619d89582e7e282d6a19"
-    }
-  }
+  "active": null,
+  "primary": ""
 }

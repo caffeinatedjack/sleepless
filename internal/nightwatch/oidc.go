@@ -210,7 +210,7 @@ Required parameters:
 Optional parameters:
   --state <string>        State value for CSRF protection
   --nonce <string>        Nonce value for ID token binding
-  --pkce-verifier <string> PKCE verifier (requires code_challenge_method=S256)
+  --pkce-challenge <string> PKCE challenge (use 'nightwatch oidc pkce' to generate)
 
 The URL is constructed with proper parameter encoding.
 
@@ -224,9 +224,9 @@ Examples:
       --nonce "..."`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		url, err := oidc.BuildAuthURL(authEndpoint, clientID, redirectURI, scope, oidc.AuthURLOptions{
-			State:        authState,
-			Nonce:        authNonce,
-			PKCEVerifier: pkceVerifier,
+			State:         authState,
+			Nonce:         authNonce,
+			PKCEChallenge: pkceVerifier,
 		})
 		if err != nil {
 			return err
@@ -243,7 +243,7 @@ func initAuthURL() {
 	authURLCmd.Flags().StringVar(&scope, "scope", "", "Requested scopes (required)")
 	authURLCmd.Flags().StringVar(&authState, "state", "", "State value for CSRF protection")
 	authURLCmd.Flags().StringVar(&authNonce, "nonce", "", "Nonce value for ID token binding")
-	authURLCmd.Flags().StringVar(&pkceVerifier, "pkce-verifier", "", "PKCE verifier")
+	authURLCmd.Flags().StringVar(&pkceVerifier, "pkce-challenge", "", "PKCE challenge (use 'nightwatch oidc pkce' to generate)")
 }
 
 // --- callback command ---

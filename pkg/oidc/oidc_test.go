@@ -107,9 +107,9 @@ func TestBuildAuthURL(t *testing.T) {
 			redirectURI:  "http://localhost:3000/callback",
 			scope:        "openid",
 			opts: AuthURLOptions{
-				PKCEVerifier: "verifier123",
+				PKCEChallenge: "challenge123",
 			},
-			wantContains: []string{"code_challenge=verifier123", "code_challenge_method=S256"},
+			wantContains: []string{"code_challenge=challenge123", "code_challenge_method=S256"},
 			wantErr:      false,
 		},
 		{
