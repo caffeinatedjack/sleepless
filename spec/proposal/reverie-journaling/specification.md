@@ -152,6 +152,21 @@ Random retrieval of past entries helps surface forgotten ideas and make unexpect
 2. Text output MUST be human-readable with syntax highlighting for Markdown.
 3. `--compact` MUST produce single-line summaries for piping to other tools.
 
+### 5.10. Encryption
+
+1. Reverie MUST support optional at-rest encryption for journal entry files.
+2. When encryption is enabled, reverie MUST encrypt entry contents before writing to disk.
+3. Encryption MUST be transparent to normal commands (add/edit/show/search/list/etc.).
+4. Encryption MUST be enabled when either:
+   - `REVERIE_PASSPHRASE` is set, or
+   - `--passphrase-stdin` is provided.
+5. When `--passphrase-stdin` is provided, reverie MUST read the passphrase from stdin.
+6. The passphrase MUST NOT be written to disk.
+7. Encrypted files MUST be stored in-place using the normal `.md` paths, with an unambiguous magic header so reverie can detect encrypted content.
+8. Reverie MUST be able to read mixed journals containing both plaintext Markdown and encrypted Markdown files.
+9. If an encrypted entry file is encountered without a passphrase provided, reverie MUST exit non-zero with an actionable error message.
+10. The encryption scheme MUST use an authenticated encryption mode (AEAD) and a password-based key derivation function.
+
 ## 6. Interface
 
 ### 6.1. Commands
@@ -405,10 +420,11 @@ reverie template create retrospective
 2. Journal files MAY contain sensitive personal or work information. Documentation MUST warn users to:
    - Set appropriate file permissions on the Journal Root
    - Avoid committing sensitive journals to public repositories
-   - Use encryption if storing on cloud-synced directories
-3. Entry IDs MUST be generated using a cryptographically secure random source to prevent collisions.
-4. When opening editors, reverie MUST validate `$EDITOR` to prevent command injection.
-5. Template processing MUST NOT execute arbitrary code from template files.
+   - Prefer encryption when storing on cloud-synced directories
+3. If encryption is enabled, reverie MUST use authenticated encryption and a modern KDF, and MUST refuse to decrypt when authentication fails.
+4. Entry IDs MUST be generated using a cryptographically secure random source to prevent collisions.
+5. When opening editors, reverie MUST validate `$EDITOR` to prevent command injection.
+6. Template processing MUST NOT execute arbitrary code from template files.
 
 ## 11. Testing Considerations
 

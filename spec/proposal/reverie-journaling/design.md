@@ -26,12 +26,12 @@ Key constraints:
 - Support tag-based organization and filtering
 - Surface random past entries for rediscovery
 - Generate standup reports from recent entries
+- Support optional at-rest encryption for journal entries
 
 ### Non-Goals
 
 - Rich text editing (Markdown only)
 - Synchronization or cloud backup (use git or syncthing separately)
-- Encryption (use file-system encryption or dedicated tools)
 - Attachments or media embedding (link to external files)
 - Mobile app or web interface
 - Real-time collaboration
@@ -120,6 +120,8 @@ pkg/journal/
   daily.go                  Daily file operations
   floating.go               Floating note operations
   index.go                  Tag and search indexing
+pkg/crypto/
+  journal.go                Journal file encryption/decryption (AEAD + KDF)
 pkg/markdown/
   frontmatter.go            YAML frontmatter parsing
   parser.go                 Markdown parsing for inline tags
@@ -221,6 +223,8 @@ Not applicable (CLI-only).
 | Hybrid storage | Matches mental model | Implementation complexity | Clear separation of concerns |
 | YAML frontmatter | Machine-readable metadata | File header noise | Standard pattern (Jekyll, Hugo, Obsidian) |
 | Inline tags in content | Natural writing flow | Duplicate data (frontmatter + content) | Sync on save; frontmatter is source of truth |
+| In-place encrypted `.md` files | No filename changes | Non-markdown bytes at rest; other tools can’t read encrypted files | Matches “keep filenames” preference; reverie detects via magic header |
+| Passphrase via env/stdin | Scriptable and tool-friendly | Env vars can leak via process inspection on some systems | Provide stdin option; document risks |
 
 ## 7. Cross-Cutting Concerns
 
@@ -228,7 +232,10 @@ Not applicable (CLI-only).
 
 - Journal files may contain sensitive personal information
 - Recommend 0700 permissions on journal root
-- Document risks of cloud sync without encryption
+- Support optional at-rest encryption; keep plaintext journaling usable
+- Key material comes from `REVERIE_PASSPHRASE` or stdin and is never written to disk
+- Use AEAD (AES-256-GCM) with a KDF (Argon2id via `golang.org/x/crypto`)
+- Fail closed on authentication/tag mismatch
 - Entry IDs use crypto/rand to prevent collision attacks
 - Validate `$EDITOR` to prevent command injection
 

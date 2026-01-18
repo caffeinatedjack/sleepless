@@ -99,18 +99,32 @@ Implement `reverie` as a new standalone executable with hybrid storage: daily en
 
 **Milestone**: `reverie random` surfaces a random entry; `reverie standup` generates report from recent work entries; `reverie stats` shows journal statistics.
 
-### Phase 6: Templates
+### Phase 6: Encryption
+
+**Goal**: Support optional at-rest encryption for journal entries (transparent to commands).
+
+- [ ] 6.1 Add `pkg/crypto/journal.go` with encrypt/decrypt helpers (AEAD + KDF)
+- [ ] 6.2 Define encrypted file format (magic header + version + salt + nonce + ciphertext)
+- [ ] 6.3 Support `REVERIE_PASSPHRASE` and `--passphrase-stdin` in root command
+- [ ] 6.4 Update journal store read/write paths to auto-detect and decrypt/encrypt
+- [ ] 6.5 Ensure mixed plaintext/encrypted journals work seamlessly
+- [ ] 6.6 Add unit tests for crypto format round-trips and auth failure behavior
+- [ ] 6.7 Add integration tests for add/show/search on encrypted journals
+
+**Milestone**: Normal commands work unchanged with encrypted journals when passphrase is provided.
+
+### Phase 7: Templates
 
 **Goal**: Implement template system for structured entries.
 
-- [ ] 6.1 Create template storage directory (`~/.config/reverie/templates/`)
-- [ ] 6.2 Implement `reverie template list` command
-- [ ] 6.3 Implement `reverie template create <name>` command
-- [ ] 6.4 Implement `reverie add --template <name>` integration
-- [ ] 6.5 Implement template placeholders (`{{DATE}}`, `{{PROMPT:...}}`)
-- [ ] 6.6 Create built-in templates: standup, meeting, reflection, idea
-- [ ] 6.7 Add unit tests for template parsing
-- [ ] 6.8 Add integration tests for template usage
+- [ ] 7.1 Create template storage directory (`~/.config/reverie/templates/`)
+- [ ] 7.2 Implement `reverie template list` command
+- [ ] 7.3 Implement `reverie template create <name>` command
+- [ ] 7.4 Implement `reverie add --template <name>` integration
+- [ ] 7.5 Implement template placeholders (`{{DATE}}`, `{{PROMPT:...}}`)
+- [ ] 7.6 Create built-in templates: standup, meeting, reflection, idea
+- [ ] 7.7 Add unit tests for template parsing
+- [ ] 7.8 Add integration tests for template usage
 
 **Milestone**: `reverie add --template meeting` creates entry from meeting template with prompts.
 

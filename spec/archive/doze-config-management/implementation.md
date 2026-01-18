@@ -17,11 +17,11 @@ Implement `doze` as a new standalone executable with three command groups: `dotf
 
 **Goal**: Establish executable structure and configuration management.
 
-- [ ] 1.1 Create `cmd/doze/main.go` entry point
-- [ ] 1.2 Create `internal/doze/root.go` with Cobra root command
-- [ ] 1.3 Implement `pkg/config/config.go` for YAML configuration loading/saving
-- [ ] 1.4 Add configuration validation and error handling
-- [ ] 1.5 Add unit tests for configuration parsing
+- [x] 1.1 Create `cmd/doze/main.go` entry point
+- [x] 1.2 Create `internal/doze/root.go` with Cobra root command
+- [x] 1.3 Implement `pkg/config/config.go` for YAML configuration loading/saving
+- [x] 1.4 Add configuration validation and error handling
+- [x] 1.5 Add unit tests for configuration parsing
 
 **Milestone**: `doze --help` displays command structure; configuration loads from `~/.config/doze/config.yml`.
 
@@ -29,14 +29,14 @@ Implement `doze` as a new standalone executable with three command groups: `dotf
 
 **Goal**: Implement profile commands for switching contexts.
 
-- [ ] 2.1 Implement `doze profile list` command
-- [ ] 2.2 Implement `doze profile current` command
-- [ ] 2.3 Implement `doze profile switch <name>` command
-- [ ] 2.4 Implement `doze profile create <name>` command
-- [ ] 2.5 Implement `doze profile delete <name>` command
-- [ ] 2.6 Implement `doze profile copy <source> <dest>` command
-- [ ] 2.7 Add `--json` output support for list commands
-- [ ] 2.8 Add unit tests for profile operations
+- [x] 2.1 Implement `doze profile list` command
+- [x] 2.2 Implement `doze profile current` command
+- [x] 2.3 Implement `doze profile switch <name>` command
+- [x] 2.4 Implement `doze profile create <name>` command
+- [x] 2.5 Implement `doze profile delete <name>` command
+- [x] 2.6 Implement `doze profile copy <source> <dest>` command
+- [x] 2.7 Add `--json` output support for list commands
+- [x] 2.8 Add unit tests for profile operations
 
 **Milestone**: Can create, switch between, and manage multiple profiles.
 
@@ -44,17 +44,17 @@ Implement `doze` as a new standalone executable with three command groups: `dotf
 
 **Goal**: Implement environment variable management and shell export generation.
 
-- [ ] 3.1 Implement `pkg/envvar/export.go` with shell-specific generators
-- [ ] 3.2 Implement `pkg/envvar/parser.go` for variable expansion
-- [ ] 3.3 Implement `doze env list` command
-- [ ] 3.4 Implement `doze env get <var>` command
-- [ ] 3.5 Implement `doze env set <var>=<value>` command
-- [ ] 3.6 Implement `doze env unset <var>` command
-- [ ] 3.7 Implement `doze env export` command with `--shell` flag
-- [ ] 3.8 Implement `doze env source` command for shell evaluation
-- [ ] 3.9 Implement shell auto-detection from `$SHELL`
-- [ ] 3.10 Add unit tests for each shell's export syntax
-- [ ] 3.11 Add unit tests for variable expansion
+- [x] 3.1 Implement `pkg/envvar/export.go` with shell-specific generators
+- [x] 3.2 Implement `pkg/envvar/parser.go` for variable expansion
+- [x] 3.3 Implement `doze env list` command
+- [x] 3.4 Implement `doze env get <var>` command
+- [x] 3.5 Implement `doze env set <var>=<value>` command
+- [x] 3.6 Implement `doze env unset <var>` command
+- [x] 3.7 Implement `doze env export` command with `--shell` flag
+- [x] 3.8 Implement `doze env source` command for shell evaluation
+- [x] 3.9 Implement shell auto-detection from `$SHELL`
+- [x] 3.10 Add unit tests for each shell's export syntax
+- [x] 3.11 Add unit tests for variable expansion
 
 **Milestone**: `eval "$(doze env source)"` works in bash, zsh, fish, and powershell.
 
@@ -62,17 +62,17 @@ Implement `doze` as a new standalone executable with three command groups: `dotf
 
 **Goal**: Implement dotfile symlinking and status tracking.
 
-- [ ] 4.1 Implement `pkg/dotfiles/linker.go` for symlink operations
-- [ ] 4.2 Implement `pkg/dotfiles/differ.go` for diff generation
-- [ ] 4.3 Implement `doze dotfiles link <repo>` command
-- [ ] 4.4 Implement `--target`, `--dry-run`, `--force` flags
-- [ ] 4.5 Implement backup creation for `--force` overwrites
-- [ ] 4.6 Implement `doze dotfiles unlink <repo>` command
-- [ ] 4.7 Implement `doze dotfiles status` command
-- [ ] 4.8 Implement `doze dotfiles diff <repo>` command
-- [ ] 4.9 Add symlink tracking in configuration
-- [ ] 4.10 Add unit tests for linking logic
-- [ ] 4.11 Add integration tests for symlink creation/removal
+- [x] 4.1 Implement `pkg/dotfiles/linker.go` for symlink operations
+- [x] 4.2 Implement `pkg/dotfiles/differ.go` for diff generation
+- [x] 4.3 Implement `doze dotfiles link <repo>` command
+- [x] 4.4 Implement `--target`, `--dry-run`, `--force` flags
+- [x] 4.5 Implement backup creation for `--force` overwrites
+- [x] 4.6 Implement `doze dotfiles unlink <repo>` command
+- [x] 4.7 Implement `doze dotfiles status` command
+- [x] 4.8 Implement `doze dotfiles diff <repo>` command
+- [x] 4.9 Add symlink tracking in configuration
+- [x] 4.10 Add unit tests for linking logic
+- [x] 4.11 Add integration tests for symlink creation/removal
 
 **Milestone**: Can link dotfiles from a repository, view status, and see diffs.
 

@@ -5,10 +5,11 @@ VERSION?=1.0.0-go
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME)"
 
-## build: Build both binaries
+## build: Build all binaries
 build:
 	go build $(LDFLAGS) -o regimen ./cmd/regimen
 	go build $(LDFLAGS) -o nightwatch ./cmd/nightwatch
+	go build $(LDFLAGS) -o doze ./cmd/doze
 
 ## test: Run tests
 test:
@@ -18,16 +19,18 @@ test:
 install:
 	@go build $(LDFLAGS) -o regimen ./cmd/regimen
 	@go build $(LDFLAGS) -o nightwatch ./cmd/nightwatch
-	@rm -f ~/.local/bin/regimen ~/.local/bin/nightwatch
+	@go build $(LDFLAGS) -o doze ./cmd/doze
+	@rm -f ~/.local/bin/regimen ~/.local/bin/nightwatch ~/.local/bin/doze
 	@cp regimen ~/.local/bin/
 	@cp nightwatch ~/.local/bin/
-	@rm regimen nightwatch
+	@cp doze ~/.local/bin/
+	@rm regimen nightwatch doze
 	@go clean
 
 
 ## clean: Remove build artifacts
 clean:
-	rm -f regimen nightwatch
+	rm -f regimen nightwatch doze
 	go clean
 
 ## fmt: Format code
