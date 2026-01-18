@@ -2,13 +2,10 @@ stages:
   - test
   - build
   - release
-  - implement
 
 variables:
   # Use the Go version from go.mod
   GO_VERSION: "1.21"
-  # OpenCode configuration (set OPENCODE_ZEN_TOKEN in CI/CD variables)
-  OPENCODE_MODEL: "anthropic/claude-sonnet-4-20250514"
 
 # Default image for Go jobs
 default:
@@ -67,67 +64,6 @@ test:
     expire_in: 1 week
   rules:
     - if: $CI_COMMIT_TAG
-
-# Lazy implementation using OpenCode AI
-# Requires OPENCODE_ZEN_TOKEN to be set in CI/CD variables
-implement:
-  stage: implement
-  image: node:20-bookworm
-  variables:
-    GIT_STRATEGY: clone
-    GIT_DEPTH: 0
-  before_script:
-    # Install opencode CLI
-    - npm i -g opencode-ai
-    # Install nocturnal CLI from GitLab artifacts
-    - |
-      curl -fsSL "https://gitlab.com/caffeinatedjack/nocturnal/-/jobs/artifacts/main/download?job=build:linux-amd64" \
-        -o nocturnal.zip
-      unzip -j nocturnal.zip -d /tmp/
-      mv /tmp/nocturnal-linux-amd64 /usr/local/bin/nocturnal
-      chmod +x /usr/local/bin/nocturnal
-    # Configure git for commits
-    - git config user.email "opencode-bot@gitlab.local"
-    - git config user.name "OpenCode Bot"
-    # Create implementation branch
-    - export BRANCH_NAME="implement/${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}"
-    - git checkout -b "$BRANCH_NAME"
-  script:
-    - |
-      # Run opencode in headless mode with lazy implementation prompt
-      opencode run "/lazy" || {
-        echo "OpenCode execution failed or no changes made"
-        exit 0
-      }
-      
-      # Check if there are any changes to commit
-      if git diff --quiet && git diff --cached --quiet; then
-        echo "No changes were made by OpenCode"
-        exit 0
-      fi
-      
-      # Stage and commit all changes
-      git add -A
-      git commit -m "feat: implement active proposal via OpenCode
-
-      Automated implementation triggered by pipeline #${CI_PIPELINE_ID}
-      Source branch: ${CI_COMMIT_REF_NAME}
-      Commit: ${CI_COMMIT_SHA}"
-      
-      # Push the branch and create merge request using push options
-      git push \
-        -o merge_request.create \
-        -o merge_request.target="${CI_COMMIT_REF_NAME}" \
-        -o merge_request.title="[OpenCode] Implement active proposal" \
-        -o merge_request.remove_source_branch \
-        "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" \
-        "$BRANCH_NAME"
-      
-      echo "Merge request created successfully"
-  rules:
-    - if: $CI_COMMIT_BRANCH
-      when: manual
-
 
 # Linux amd64 build
 build:linux-amd64:
