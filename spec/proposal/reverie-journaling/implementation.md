@@ -126,7 +126,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 6.10 Add encryption state checks to all note/task commands
 - [x] 6.11 Ensure commands fail with helpful error when wiki is encrypted
 - [x] 6.12 Add unit tests for crypto format round-trips
-- [ ] 6.13 Add unit tests for authentication failure behavior
+- [x] 6.13 Add unit tests for authentication failure behavior
 - [ ] 6.14 Add integration tests for encrypt/decrypt workflows
 - [ ] 6.15 Add tests for command blocking when encrypted
 
