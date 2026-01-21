@@ -97,7 +97,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 
 **Goal**: Implement random surfacing, report generation, and statistics.
 
-- [ ] 5.1 Implement `regimen note random` command
+- [x] 5.1 Implement `regimen note random` command
 - [ ] 5.2 Implement `--tag` and `--count` flags for random
 - [ ] 5.3 Implement `regimen note report` command
 - [ ] 5.4 Implement `--days` flag for report
