@@ -117,7 +117,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 6.1 Add `pkg/crypto/wiki.go` with encrypt/decrypt functions (AEAD + KDF)
 - [x] 6.2 Define encrypted file format (REGIMENENC header + nonce + ciphertext)
 - [x] 6.3 Define `.encrypted` marker JSON (salt + argon2 params)
-- [ ] 6.4 Implement `.encrypted` marker file creation/removal
+- [x] 6.4 Implement `.encrypted` marker file creation/removal
 - [ ] 6.5 Implement `regimen encrypt` command with passphrase handling
 - [ ] 6.6 Implement `regimen decrypt` command with passphrase handling
 - [ ] 6.7 Support `--passphrase-stdin` flag and interactive prompt (confirm on encrypt)
