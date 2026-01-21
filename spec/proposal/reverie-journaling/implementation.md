@@ -45,7 +45,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 2.4 Implement `regimen note add` (editor mode; opens daily note)
 - [x] 2.5 Implement `--date`, `--tags`, `--floating`, `--daily` flags
 - [x] 2.6 Implement `regimen note edit <id>` command (floating)
-- [ ] 2.7 Implement `regimen note edit --date <date>` command (daily)
+- [x] 2.7 Implement `regimen note edit --date <date>` command (daily)
 - [ ] 2.8 Implement `regimen note delete <id>` command (floating)
 - [ ] 2.9 Implement `regimen note delete --date <date>` command (daily)
 - [ ] 2.10 Implement ID prefix resolution (floating notes)
