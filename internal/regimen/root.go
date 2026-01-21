@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -60,6 +61,17 @@ func getWikiDir() string {
 		return expandPath(env)
 	}
 	return expandPath(defaultWikiDir)
+}
+
+// expandPath expands the tilde (~) prefix to the user's home directory.
+func expandPath(path string) string {
+	if strings.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			return filepath.Join(home, path[2:])
+		}
+	}
+	return path
 }
 
 // ErrWikiEncrypted is returned when attempting to access an encrypted wiki.

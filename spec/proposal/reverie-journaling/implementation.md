@@ -106,7 +106,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 5.7 Calculate entry counts, tag distribution, streaks
 - [x] 5.8 Add unit tests for random selection
 - [x] 5.9 Add unit tests for report generation
-- [ ] 5.10 Add unit tests for statistics calculation
+- [x] 5.10 Add unit tests for statistics calculation
 
 **Milestone**: `regimen note random` surfaces a random entry; `regimen note report` generates report from recent work entries; `regimen note stats` shows note statistics.
 
