@@ -101,7 +101,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 5.2 Implement `--tag` and `--count` flags for random
 - [x] 5.3 Implement `regimen note report` command
 - [x] 5.4 Implement `--days` flag for report
-- [ ] 5.5 Implement work-tag filtering for report
+- [x] 5.5 Implement work-tag filtering for report
 - [ ] 5.6 Implement `regimen note stats` command
 - [ ] 5.7 Calculate entry counts, tag distribution, streaks
 - [ ] 5.8 Add unit tests for random selection
