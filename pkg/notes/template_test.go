@@ -94,12 +94,30 @@ func TestApplyTemplate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create mock reader that returns prompt answers
+			// We need to extract prompts in the order they appear in the template
 			var inputLines []string
-			for question, answer := range tt.prompts {
-				// We need to match prompts in order they appear
-				if strings.Contains(tt.template, "{{PROMPT:"+question+"}}") {
+			template := tt.template
+			for {
+				start := strings.Index(template, "{{PROMPT:")
+				if start == -1 {
+					break
+				}
+				end := strings.Index(template[start:], "}}")
+				if end == -1 {
+					break
+				}
+				end += start
+
+				// Extract the question from the placeholder
+				question := strings.TrimSpace(template[start+9 : end])
+
+				// Look up the answer for this question
+				if answer, ok := tt.prompts[question]; ok {
 					inputLines = append(inputLines, answer)
 				}
+
+				// Move past this placeholder
+				template = template[end+2:]
 			}
 			input := strings.Join(inputLines, "\n") + "\n"
 			reader := bufio.NewReader(strings.NewReader(input))
