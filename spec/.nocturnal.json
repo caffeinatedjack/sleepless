@@ -1,14 +1,5 @@
 {
   "version": 1,
-  "active": [
-    "reverie-journaling"
-  ],
-  "primary": "reverie-journaling",
-  "hashes": {
-    "reverie-journaling": {
-      "design.md": "ccaac0a291f970b973730472f26b998967fde3657d43bae6489606f8e2e6ea66",
-      "implementation.md": "8b134040942361d1bd194bcc97db593efd808f1ac35286e7dd65f85415cce9ec",
-      "specification.md": "7afad68dfc7bc63a64fd575afdd9f964cdf73eb09c0f392c0bbe169c8b38472d"
-    }
-  }
+  "active": null,
+  "primary": ""
 }
