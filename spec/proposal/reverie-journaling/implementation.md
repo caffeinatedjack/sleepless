@@ -142,7 +142,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 7.4 Implement `regimen note add --template <name>` integration
 - [x] 7.5 Implement template placeholders (`{{DATE}}`, `{{PROMPT:...}}`)
 - [x] 7.6 Create built-in templates: meeting, reflection, idea, report
-- [ ] 7.7 Add unit tests for template parsing
+- [x] 7.7 Add unit tests for template parsing
 - [ ] 7.8 Add integration tests for template usage
 
 **Milestone**: `regimen note add --template meeting` creates entry from meeting template with prompts.
