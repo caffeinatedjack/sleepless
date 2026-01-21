@@ -1,6 +1,7 @@
 package regimen
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -52,6 +53,16 @@ func runNoteAdd(cmd *cobra.Command, args []string) error {
 
 	if err := store.EnsureStructure(); err != nil {
 		return err
+	}
+
+	// Ensure built-in templates exist
+	if err := store.EnsureBuiltInTemplates(); err != nil {
+		return fmt.Errorf("failed to ensure templates: %w", err)
+	}
+
+	// Handle template mode
+	if addTemplate != "" {
+		return runAddFromTemplate(store, args)
 	}
 
 	// Parse tags
@@ -154,4 +165,78 @@ func openEditor(path string) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func runAddFromTemplate(store *notes.Store, args []string) error {
+	// Get template
+	tmpl, err := store.GetTemplate(addTemplate)
+	if err != nil {
+		return err
+	}
+
+	// Apply template with prompts
+	reader := bufio.NewReader(os.Stdin)
+	content, err := notes.ApplyTemplate(tmpl.Content, reader)
+	if err != nil {
+		return fmt.Errorf("failed to apply template: %w", err)
+	}
+
+	// Determine if this should be a daily or floating note
+	// If --date or --daily is specified, create daily note
+	// Otherwise create floating note
+	if addDate != "" || addDaily {
+		targetDate := addDate
+		if targetDate == "" {
+			targetDate = time.Now().Format("2006-01-02")
+		}
+
+		note, err := store.GetOrCreateDaily(targetDate)
+		if err != nil {
+			return err
+		}
+
+		// Parse tags from --tags flag
+		var tagList []string
+		if addNoteTags != "" {
+			for _, tag := range strings.Split(addNoteTags, ",") {
+				tag = strings.TrimSpace(strings.ToLower(tag))
+				if tag != "" {
+					tagList = append(tagList, tag)
+				}
+			}
+		}
+
+		// Append content to daily note
+		notes.AppendDailyEntry(note, content, tagList)
+
+		if err := store.SaveDaily(note); err != nil {
+			return err
+		}
+
+		ui.Success(fmt.Sprintf("Added templated entry to %s", targetDate))
+		return nil
+	}
+
+	// Create floating note
+	var tagList []string
+	if addNoteTags != "" {
+		for _, tag := range strings.Split(addNoteTags, ",") {
+			tag = strings.TrimSpace(strings.ToLower(tag))
+			if tag != "" {
+				tagList = append(tagList, tag)
+			}
+		}
+	}
+
+	note, err := store.CreateFloating("", content, tagList)
+	if err != nil {
+		return err
+	}
+
+	if err := store.SaveFloating(note); err != nil {
+		return err
+	}
+
+	ui.Success(fmt.Sprintf("Created floating note %s from template %q", note.ID, addTemplate))
+	return nil
 }

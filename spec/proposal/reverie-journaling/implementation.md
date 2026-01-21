@@ -128,7 +128,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 6.12 Add unit tests for crypto format round-trips
 - [x] 6.13 Add unit tests for authentication failure behavior
 - [x] 6.14 Add integration tests for encrypt/decrypt workflows
-- [ ] 6.15 Add tests for command blocking when encrypted
+- [x] 6.15 Add tests for command blocking when encrypted
 
 **Milestone**: `regimen encrypt` encrypts all .md files; `regimen decrypt` decrypts them; all commands block when `.encrypted` marker exists.
 
