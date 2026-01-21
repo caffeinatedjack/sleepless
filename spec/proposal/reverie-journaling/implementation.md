@@ -79,7 +79,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 **Goal**: Implement full-text search and tag management.
 
 - [x] 4.1 Implement `pkg/notes/index.go` search indexing
-- [ ] 4.2 Implement `regimen note search <query>` command
+- [x] 4.2 Implement `regimen note search <query>` command
 - [ ] 4.3 Implement `--or`, `--tags`, `--after`, `--before` flags
 - [ ] 4.4 Implement context snippets in search results
 - [ ] 4.5 Implement `regimen note tags` command (list all tags)
