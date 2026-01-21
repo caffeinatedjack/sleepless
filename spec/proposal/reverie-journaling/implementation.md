@@ -64,7 +64,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 
 - [x] 3.1 Implement `regimen note today` command
 - [x] 3.2 Implement `regimen note show <id>` (floating) and `regimen note show --date` (daily)
-- [ ] 3.3 Implement `regimen note list` command with preview
+- [x] 3.3 Implement `regimen note list` command with preview
 - [ ] 3.4 Implement `--limit`, `--tags`, `--date`, `--range` flags
 - [ ] 3.5 Implement `regimen note week` command
 - [ ] 3.6 Implement `regimen note month` command
