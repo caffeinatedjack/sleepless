@@ -9,11 +9,11 @@ A collection of personal productivity tools for managing your digital life throu
 Security and development utilities for offline, scriptable workflows.
 
 **Features:**
-- 🔍 **Guard**: Scan code for secrets and PII (pre-commit hooks, CI)
-- 🔒 **Redact**: PII/secret redaction in logs and files
-- 🔑 **Password**: Secure password and passphrase generation
-- 🔐 **JWT**: JWT token operations (decode, verify)
-- 🎭 **Fake**: Fake data generation for testing
+- **Guard**: Scan code for secrets and PII (pre-commit hooks, CI)
+- **Redact**: PII/secret redaction in logs and files
+- **Password**: Secure password and passphrase generation
+- **JWT**: JWT token operations (decode, verify)
+- **Fake**: Fake data generation for testing
 
 **Installation:**
 ```bash
@@ -47,12 +47,12 @@ nightwatch password phrase --words 6
 Personal knowledge management and productivity CLI for your Vim wiki.
 
 **Features:**
-- 📝 **Notes**: Daily journaling and floating notes with full-text search
-- 🎯 **Goals**: Task and goal tracking with hierarchical organization
-- 🍳 **Recipes**: Recipe collection and management
-- 🔐 **Encryption**: Wiki-wide encryption with AES-256-GCM
-- 📋 **Templates**: Structured note templates for meetings, reflections, and more
-- 🌍 **World Clock**: Time zone conversion and world clock
+- **Notes**: Daily journaling and floating notes with full-text search
+- **Goals**: Task and goal tracking with hierarchical organization
+- **Recipes**: Recipe collection and management
+- **Encryption**: Wiki-wide encryption with AES-256-GCM
+- **Templates**: Structured note templates for meetings, reflections, and more
+- **World Clock**: Time zone conversion and world clock
 
 **Installation:**
 ```bash

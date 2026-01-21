@@ -97,6 +97,7 @@ Format: `[ShortName]` Author, "Title", Date, URL
 5. **Structured Lists**: Use bullet points or numbered lists for multiple related items
 6. **Examples**: Mark clearly as "Example:" or use indented code blocks
 7. **Consistency**: Use the same term for the same concept throughout
+8. **No Emojis**: Do NOT use emojis in specifications or documentation - use clear, professional language instead
 
 ## Section Numbering
 
