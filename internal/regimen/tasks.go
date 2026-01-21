@@ -3,6 +3,8 @@ package regimen
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"gitlab.com/caffeinatedjack/sleepless/pkg/storage"
@@ -10,7 +12,7 @@ import (
 	"gitlab.com/caffeinatedjack/sleepless/pkg/ui"
 )
 
-var store = storage.New()
+var store *storage.Storage
 
 var goalsCmd = &cobra.Command{
 	Use:   "goals",
@@ -35,6 +37,17 @@ Examples:
     regimen goals list --priority high
     regimen goals view progress`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Initialize storage with wiki directory
+		wikiDir := getWikiDir()
+		tasksPath := filepath.Join(wikiDir, "tasks")
+		store = storage.New(tasksPath)
+
+		// Check if wiki is encrypted
+		if err := checkWikiEncrypted(wikiDir); err != nil {
+			ui.Error(err.Error())
+			os.Exit(1)
+		}
+
 		store.EnsureStructure()
 	},
 }

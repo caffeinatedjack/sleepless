@@ -45,6 +45,14 @@ Examples:
     regimen recipes search chicken
     regimen recipes new "Lemon Tart"
     regimen recipes shopping-list pasta salad --out /tmp/shopping.md`,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Check if wiki is encrypted
+		wikiDir := getWikiDir()
+		if err := checkWikiEncrypted(wikiDir); err != nil {
+			return err
+		}
+		return nil
+	},
 }
 
 func init() {
