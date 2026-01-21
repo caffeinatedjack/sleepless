@@ -2,6 +2,8 @@
 package notes
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 )
 
@@ -105,4 +107,14 @@ func (n *Note) HasTag(tag string) bool {
 		}
 	}
 	return false
+}
+
+// GenerateID generates a new 8-character lowercase hex ID using crypto/rand.
+func GenerateID() (string, error) {
+	// Generate 4 random bytes (32 bits) -> 8 hex chars
+	bytes := make([]byte, 4)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }

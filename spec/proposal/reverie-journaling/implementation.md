@@ -27,7 +27,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 1.4 Create `internal/regimen/note.go` with note command group
 - [x] 1.5 Implement `pkg/notes/entry.go` entry model
 - [x] 1.6 Update `pkg/markdown/frontmatter.go` to support note metadata (if needed)
-- [ ] 1.7 Implement `pkg/notes/store.go` storage abstraction with wiki directory configuration
+- [x] 1.7 Implement `pkg/notes/store.go` storage abstraction with wiki directory configuration
 - [ ] 1.8 Implement ID generation using crypto/rand
 - [ ] 1.9 Implement `.encrypted` marker file check in notes store
 - [ ] 1.10 Add unit tests for entry parsing and serialization
