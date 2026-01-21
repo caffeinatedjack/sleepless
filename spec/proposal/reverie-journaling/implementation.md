@@ -114,7 +114,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 
 **Goal**: Implement wiki-wide encryption/decryption commands.
 
-- [ ] 6.1 Add `pkg/crypto/wiki.go` with encrypt/decrypt functions (AEAD + KDF)
+- [x] 6.1 Add `pkg/crypto/wiki.go` with encrypt/decrypt functions (AEAD + KDF)
 - [ ] 6.2 Define encrypted file format (REGIMENENC header + nonce + ciphertext)
 - [ ] 6.3 Define `.encrypted` marker JSON (salt + argon2 params)
 - [ ] 6.4 Implement `.encrypted` marker file creation/removal
