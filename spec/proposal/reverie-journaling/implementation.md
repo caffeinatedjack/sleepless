@@ -52,7 +52,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 2.11 Implement inline tag extraction from content
 - [x] 2.12 Implement `@task:<id>` reference parsing in `pkg/notes/taskref.go`
 - [x] 2.13 Add unit tests for daily file operations
-- [ ] 2.14 Add unit tests for floating note operations
+- [x] 2.14 Add unit tests for floating note operations
 - [ ] 2.15 Add unit tests for task reference parsing
 - [ ] 2.16 Add integration tests for add/edit/delete workflows
 
