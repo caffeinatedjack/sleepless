@@ -27,7 +27,7 @@ Implement a new `nightwatch guard` Cobra command group that scans staged snapsho
 
 **Goal**: Expose commands and output formats.
 
-- [ ] Add `internal/nightwatch/guard.go` Cobra commands: `staged`, `worktree`, `path`, `baseline`.
+- [x] Add `internal/nightwatch/guard.go` Cobra commands: `staged`, `worktree`, `path`, `baseline`.
 - [ ] Implement `--json` output and safe human-readable output.
 - [ ] Ensure exit codes match spec (no findings vs findings vs error).
 
