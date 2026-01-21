@@ -119,7 +119,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 6.3 Define `.encrypted` marker JSON (salt + argon2 params)
 - [x] 6.4 Implement `.encrypted` marker file creation/removal
 - [x] 6.5 Implement `regimen encrypt` command with passphrase handling
-- [ ] 6.6 Implement `regimen decrypt` command with passphrase handling
+- [x] 6.6 Implement `regimen decrypt` command with passphrase handling
 - [ ] 6.7 Support `--passphrase-stdin` flag and interactive prompt (confirm on encrypt)
 - [ ] 6.8 Encrypt eligible file types: `.md` and `.json` (skip `.git/`, skip symlinks)
 - [ ] 6.9 Best-effort operation with per-file errors and summary
