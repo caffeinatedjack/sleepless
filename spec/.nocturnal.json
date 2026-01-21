@@ -1,5 +1,14 @@
 {
   "version": 1,
-  "active": null,
-  "primary": ""
+  "active": [
+    "nightwatch-guard"
+  ],
+  "primary": "nightwatch-guard",
+  "hashes": {
+    "nightwatch-guard": {
+      "design.md": "de56725c1d15cb186fdfc4d9f37192ae35e011cf51198880e29543c33ee54e42",
+      "implementation.md": "dce755466462c4d38d7699c52d3256328fc84b7228d144ac84fdb620ad330731",
+      "specification.md": "468a768d5c252966d3913e2367a68ac9729fc4e8670e5d1a51caa15e882389ff"
+    }
+  }
 }
