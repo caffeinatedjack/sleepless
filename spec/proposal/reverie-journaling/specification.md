@@ -1,11 +1,66 @@
 # reverie-journaling
 
 **Depends on**: none
-**Affected files**: cmd/reverie/main.go, internal/reverie/, pkg/journal/, pkg/markdown/
+**Affected files**: internal/regimen/note*.go, pkg/notes/, pkg/markdown/, pkg/crypto/
 
 ## Abstract
 
-This specification defines a new standalone executable `reverie` for personal journaling, idea capture, and note management. It provides commands for quick note-taking, daily journaling, full-text search across entries, tag-based organization, random idea surfacing, and standup generation. All data is stored as Markdown files compatible with personal wiki systems.
+This specification defines a new `note` command group within the `regimen` executable for personal journaling, idea capture, and note management. It provides commands for quick note-taking, daily journaling, full-text search across entries, tag-based organization, random idea surfacing, and report generation. All data is stored as Markdown files in the wiki directory (`~/wiki/notes/`) alongside task files. The wiki directory can be encrypted/decrypted via `regimen encrypt` and `regimen decrypt` commands.
+
+## Overview
+
+### What
+
+- Add `regimen note` commands for daily notes (date-addressed) and floating notes (ID-addressed)
+- Store notes in a Vimwiki-compatible directory alongside existing tasks
+- Add explicit wiki-wide `regimen encrypt` / `regimen decrypt` commands to protect local data at rest
+
+### Why
+
+- Keep tasks and notes local-first and human-editable
+- Reduce context switching by capturing ideas and journal entries from the same CLI that manages tasks
+- Provide a simple, explicit encryption workflow that is compatible with "offline" and "single-user" assumptions
+
+### Who
+
+- Primary users: terminal-first users maintaining a `~/wiki/` directory for tasks and knowledge
+- Affected systems: the `regimen` CLI and on-disk wiki directory structure
+
+### Success Criteria
+
+The proposal is complete when:
+
+1. Notes can be created/edited/viewed/searched using `regimen note ...` and are persisted in `~/wiki/notes/`.
+2. `regimen encrypt` converts eligible files to `.enc`, writes `.encrypted`, and blocks wiki-data commands until decrypted.
+3. `regimen decrypt` reverses encryption and restores original filenames.
+4. All commands produce actionable errors when the wiki is encrypted or partially encrypted.
+5. Unit and integration tests cover the main workflows (notes + encryption) with deterministic fixtures.
+
+### Out of Scope
+
+- Automatic on-the-fly decryption/encryption during normal commands
+- Bidirectional task-note linking (notes may contain `@task:<id>` syntax only)
+- Syncing/backups/cloud features
+- Attachments/media
+- Cross-device conflict resolution
+
+## DEPENDENCIES
+
+### Proposal Dependencies
+
+- none
+
+### Third-Party Dependencies
+
+- github.com/spf13/cobra: CLI command parsing and flag handling
+- gopkg.in/yaml.v3: YAML frontmatter parsing for notes and templates
+- golang.org/x/crypto/argon2: Argon2id KDF for deriving encryption key from passphrase
+- golang.org/x/term: no-echo passphrase prompting in terminal
+
+### Missing Third-Party Docs
+
+The repository currently does not include `spec/third/` documentation.
+Implementation SHOULD add third-party docs for the dependencies above before coding begins.
 
 ## 1. Introduction
 
@@ -13,9 +68,9 @@ Knowledge workers frequently need to capture fleeting thoughts, maintain daily l
 
 Most note-taking tools either lock data in proprietary formats, require cloud synchronization, or provide poor terminal integration. Developers who spend their day in the terminal want a fast, keyboard-driven way to capture and retrieve thoughts without context-switching to a GUI.
 
-This specification defines `reverie`, a terminal-first journaling and note-taking tool that stores everything as Markdown files. The name "reverie" captures the dreamlike flow of thoughts and ideas that the tool is designed to capture and surface. It provides quick capture for fleeting thoughts, structured journaling for daily logs, tagging for organization, and full-text search for retrieval.
+This specification extends the `regimen` executable with a `note` command group for terminal-first journaling and note-taking. Notes are stored as Markdown files in `~/wiki/notes/` alongside task management files. This provides quick capture for fleeting thoughts, structured journaling for daily logs, tagging for organization, and full-text search for retrieval.
 
-The tool integrates with the sleepless ecosystem's philosophy: terminal-first, local-first, human-readable storage, and scriptable interfaces.
+The tool integrates with the sleepless ecosystem's philosophy: terminal-first, local-first, human-readable storage, and scriptable interfaces. Notes can reference tasks using `@task:<id>` syntax for future integration.
 
 ## 2. Requirements Notation
 
@@ -23,11 +78,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## 3. Terminology
 
-`Entry`: A single journal entry or note with a timestamp, content, and optional tags.
+`Note`: A Markdown file managed by `regimen note`.
 
-`Journal`: A time-based collection of entries organized by date (daily logs, reflections).
+`Daily Note`: A note associated with a calendar date, stored as `YYYY-MM-DD.md` in the notes directory.
 
-`Note`: A standalone entry not necessarily tied to a specific date (ideas, meeting notes, references).
+`Floating Note`: A note not associated with a calendar date, stored as `<id>.md` in the notes directory.
 
 `Tag`: A label attached to an entry for categorization and filtering (e.g., `#work`, `#idea`, `#meeting`).
 
@@ -35,19 +90,19 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 `Floating Note`: A standalone note with a unique ID, stored independently of date structure.
 
-`Journal Root`: The directory where reverie stores all entries (default: `~/journal`).
+`Notes Directory`: The directory where notes are stored (default: `~/wiki/notes/`).
 
-`Template`: A predefined structure for specific entry types (standup, meeting, reflection).
+`Template`: A predefined Markdown structure for specific note types (meeting, reflection, idea, report).
 
 `Random Surfacing`: The process of retrieving random past entries to surface forgotten ideas.
 
 ## 4. Concepts
 
-### 4.1. Dual Entry Model
+### 4.1. Dual Note Model
 
-Reverie supports two types of entries:
-1. **Daily Entries**: Time-based logs tied to specific dates, useful for journaling and daily logs
-2. **Floating Notes**: Standalone notes with unique IDs, useful for ideas and references that aren't date-specific
+The system supports two types of notes:
+1. **Daily Notes**: One file per date, useful for journaling and daily logs
+2. **Floating Notes**: Standalone files with unique IDs, useful for ideas and references that aren't date-specific
 
 This dual model accommodates both chronological journaling and timeless note-taking.
 
@@ -69,82 +124,97 @@ Random retrieval of past entries helps surface forgotten ideas and make unexpect
 
 ## 5. Requirements
 
-### 5.1. Core Executable
+### 5.1. Core Command Group
 
-1. The project MUST provide a standalone executable named `reverie`.
-2. The executable MUST be independent of other sleepless executables.
+1. The `regimen` executable MUST provide a `note` command group.
+2. The `note` commands MUST be integrated into the existing `regimen` CLI.
 3. All commands MUST return exit code 0 on success and non-zero on failure.
+4. The wiki directory MUST be configurable via `--wiki-dir` flag, `REGIMEN_WIKI_DIR` environment variable, or default to `~/wiki`.
+5. Configuration precedence MUST be: flag > environment variable > default.
 
-### 5.2. Entry Commands
+### 5.2. Note Commands
 
-1. `reverie add <text>` MUST create a new entry with the provided text.
-2. `reverie add` (without text) MUST open the user's default editor to write an entry.
-3. `reverie add --date <date>` MUST create an entry for a specific date (YYYY-MM-DD format).
-4. `reverie add --tags <tags>` MUST attach comma-separated tags to the entry.
-5. `reverie add --template <name>` MUST create an entry from a predefined template.
-6. `reverie add --floating` MUST create a floating note instead of a daily entry.
-7. `reverie edit <id>` MUST open the specified entry in the user's editor.
-8. `reverie delete <id>` MUST remove the specified entry.
-9. Entry IDs MUST be short prefixes (6-8 characters) that uniquely identify entries.
+1. `regimen note add <text>` MUST append a new timestamped section to the target daily note.
+2. `regimen note add` (without text) MUST open the target daily note in the user's default editor.
+3. `regimen note add --date <date>` MUST target a specific daily note (YYYY-MM-DD format).
+4. `regimen note add --tags <tags>` MUST attach comma-separated tags to the entry.
+5. `regimen note add --template <name>` MUST create an entry from a predefined template.
+6. `regimen note add --floating` MUST create a floating note instead of a daily note.
+7. `regimen note add --daily` MUST explicitly target a daily note (default behavior).
+8. `regimen note edit <id>` MUST open the specified floating note in the user's editor.
+9. `regimen note edit --date <date>` MUST open the specified daily note in the user's editor.
+10. `regimen note delete <id>` MUST delete the specified floating note.
+11. `regimen note delete --date <date>` MUST delete the specified daily note.
+12. Floating note IDs MUST be 8-character lowercase hex strings and be addressable via unique prefixes (6-8 characters).
+13. Notes MAY reference tasks using `@task:<id>` syntax in their content.
 
 ### 5.3. Viewing Commands
 
-1. `reverie today` MUST display all entries from today.
-2. `reverie week` MUST display a summary of the past 7 days' entries.
-3. `reverie month` MUST display a summary of the current month's entries.
-4. `reverie show <id>` MUST display a specific entry.
-5. `reverie list` MUST list recent entries with timestamps and previews.
-6. `reverie list --limit <n>` MUST limit output to n entries (default: 20).
-7. `reverie list --tags <tags>` MUST filter entries by tags (comma-separated, OR logic).
-8. `reverie list --date <date>` MUST show entries from a specific date.
-9. `reverie list --range <start> <end>` MUST show entries within a date range.
+1. `regimen note today` MUST display today's daily note.
+2. `regimen note week` MUST display a list of daily notes from the past 7 days with previews.
+3. `regimen note month` MUST display a list of daily notes from the current month with previews.
+4. `regimen note show <id>` MUST display a specific floating note.
+5. `regimen note show --date <date>` MUST display a specific daily note.
+6. `regimen note list` MUST list recent notes with timestamps and previews.
+7. `regimen note list --limit <n>` MUST limit output to n notes (default: 20).
+8. `regimen note list --tags <tags>` MUST filter notes by tags (comma-separated, OR logic).
+9. `regimen note list --date <date>` MUST show the daily note for a specific date.
+10. `regimen note list --range <start> <end>` MUST list daily notes within a date range.
 
 ### 5.4. Search Commands
 
-1. `reverie search <query>` MUST search entry text and titles case-insensitively.
+1. `regimen note search <query>` MUST search note text and titles case-insensitively.
 2. Search MUST support multiple search terms (AND logic by default).
-3. `reverie search --or <terms>` MUST use OR logic for multiple terms.
-4. `reverie search --tags <tags>` MUST limit search to specific tags.
-5. `reverie search --after <date>` MUST limit search to entries after a date.
-6. `reverie search --before <date>` MUST limit search to entries before a date.
-7. Search results MUST include entry ID, date, matched context, and tags.
+3. `regimen note search --or <terms>` MUST use OR logic for multiple terms.
+4. `regimen note search --tags <tags>` MUST limit search to specific tags.
+5. `regimen note search --after <date>` MUST limit search to entries after a date.
+6. `regimen note search --before <date>` MUST limit search to entries before a date.
+7. Search results MUST include note identifier (date for daily or ID for floating), matched context, and tags.
 
 ### 5.5. Tag Commands
 
-1. `reverie tags` MUST list all tags with entry counts.
-2. `reverie tags <tag>` MUST show all entries with the specified tag.
-3. `reverie tag <id> <tags>` MUST add tags to an existing entry.
-4. `reverie untag <id> <tags>` MUST remove tags from an existing entry.
+1. `regimen note tags` MUST list all tags with entry counts.
+2. `regimen note tags <tag>` MUST show all entries with the specified tag.
+3. `regimen note tag <id> <tags>` MUST add tags to an existing entry.
+4. `regimen note untag <id> <tags>` MUST remove tags from an existing entry.
 
 ### 5.6. Special Commands
 
-1. `reverie random` MUST display a random past entry.
-2. `reverie random --tag <tag>` MUST display a random entry with the specified tag.
-3. `reverie random --count <n>` MUST display n random entries.
-4. `reverie standup` MUST generate a standup report from recent entries.
-5. `reverie standup --days <n>` MUST include entries from the past n days (default: 1).
-6. The standup report MUST use entries tagged with `#work` or `#progress` by default.
-7. `reverie stats` MUST display statistics (entry count, tags, entries per week, streak).
+1. `regimen note random` MUST display a random note (daily or floating).
+2. `regimen note random --tag <tag>` MUST display a random entry with the specified tag.
+3. `regimen note random --count <n>` MUST display n random entries.
+4. `regimen note report` MUST generate a report from recent daily notes.
+5. `regimen note report --days <n>` MUST include entries from the past n days (default: 1).
+6. The report MUST use entries tagged with `#work` or `#progress` by default.
+7. `regimen note stats` MUST display statistics (entry count, tags, entries per week, streak).
 
 ### 5.7. Template Commands
 
-1. `reverie template list` MUST list available templates.
-2. `reverie template create <name>` MUST create a new template.
+1. `regimen note template list` MUST list available templates.
+2. `regimen note template create <name>` MUST create a new template.
 3. Templates MUST support placeholders for date, time, and custom prompts.
-4. Built-in templates MUST include: `standup`, `meeting`, `reflection`, `idea`.
+4. Built-in templates MUST include: `meeting`, `reflection`, `idea`, `report`.
+5. Templates MUST be stored in `~/wiki/.templates/` by default.
 
 ### 5.8. Storage Format
 
-1. Daily entries MUST be stored in `YYYY/MM/DD.md` structure.
-2. Floating notes MUST be stored in `notes/<id>.md`.
-3. Each entry MUST have YAML frontmatter with:
-   - `id`: unique identifier (short hex string)
+1. Daily notes MUST be stored as `~/wiki/notes/YYYY-MM-DD.md`.
+2. Floating notes MUST be stored as `~/wiki/notes/<id>.md`.
+3. Daily notes MUST have YAML frontmatter with:
+   - `date`: YYYY-MM-DD
    - `created`: RFC3339 timestamp
    - `updated`: RFC3339 timestamp (if modified)
    - `tags`: array of strings
-   - `type`: "daily" or "floating"
-4. The Journal Root MUST default to `~/journal`.
-5. The system MUST support `REVERIE_JOURNAL_DIR` environment variable to override.
+   - `type`: "daily"
+4. Floating notes MUST have YAML frontmatter with:
+   - `id`: unique identifier (8-char lowercase hex)
+   - `created`: RFC3339 timestamp
+   - `updated`: RFC3339 timestamp (if modified)
+   - `tags`: array of strings
+   - `type`: "floating"
+5. The Notes Directory MUST default to `~/wiki/notes/`.
+6. The wiki directory MUST be configurable via `--wiki-dir` flag or `REGIMEN_WIKI_DIR` environment variable.
+7. Notes MAY contain `@task:<id>` references to link to task files (syntax reserved for future use).
 
 ### 5.9. Output Formats
 
@@ -154,60 +224,96 @@ Random retrieval of past entries helps surface forgotten ideas and make unexpect
 
 ### 5.10. Encryption
 
-1. Reverie MUST support optional at-rest encryption for journal entry files.
-2. When encryption is enabled, reverie MUST encrypt entry contents before writing to disk.
-3. Encryption MUST be transparent to normal commands (add/edit/show/search/list/etc.).
-4. Encryption MUST be enabled when either:
-   - `REVERIE_PASSPHRASE` is set, or
-   - `--passphrase-stdin` is provided.
-5. When `--passphrase-stdin` is provided, reverie MUST read the passphrase from stdin.
-6. The passphrase MUST NOT be written to disk.
-7. Encrypted files MUST be stored in-place using the normal `.md` paths, with an unambiguous magic header so reverie can detect encrypted content.
-8. Reverie MUST be able to read mixed journals containing both plaintext Markdown and encrypted Markdown files.
-9. If an encrypted entry file is encountered without a passphrase provided, reverie MUST exit non-zero with an actionable error message.
-10. The encryption scheme MUST use an authenticated encryption mode (AEAD) and a password-based key derivation function.
+1. `regimen encrypt` MUST encrypt all `.md` and `.json` files in the wiki directory recursively.
+2. `regimen decrypt` MUST decrypt all `.enc` files in the wiki directory recursively.
+3. Encrypted files MUST use the `.enc` extension (e.g., `file.md` becomes `file.md.enc`).
+4. A `.encrypted` marker file MUST be created in the wiki root when encryption is active.
+5. The passphrase MUST be provided via `--passphrase-stdin` flag OR interactive prompt.
+6. When passphrase is entered interactively for `regimen encrypt`, the passphrase MUST be confirmed by entering it twice.
+7. The passphrase MUST NOT be written to disk.
+8. If the `.encrypted` marker exists, any command that reads or writes the wiki directory MUST exit with error: "Wiki is encrypted. Run 'regimen decrypt' first."
+9. The encryption scheme MUST use authenticated encryption (AEAD) and a password-based key derivation function (Argon2id).
+10. The encryption implementation MUST skip `wiki/.git/` entirely.
+11. The encryption implementation MUST NOT follow symlinks while scanning the wiki directory.
+12. The encryption implementation MUST be best-effort: it MUST attempt all eligible files, then exit non-zero if any failures occurred.
+13. `regimen encrypt` MUST fail if wiki is already encrypted (marker file exists).
+14. `regimen decrypt` MUST fail if wiki is not encrypted (no marker file).
+15. After successful decryption, the `.encrypted` marker file MUST be removed.
+
+### 5.11. Encryption File Format
+
+1. The `.encrypted` marker file MUST be plaintext and MUST be JSON.
+2. The `.encrypted` marker JSON MUST include:
+   - `version` (integer)
+   - `created` (RFC3339 timestamp)
+   - `salt_b64` (base64, 16+ bytes)
+   - `argon2_time` (integer)
+   - `argon2_memory_kib` (integer)
+   - `argon2_threads` (integer)
+3. The marker file MUST use these default Argon2id parameters ("Balanced"):
+   - `argon2_time`: 3
+   - `argon2_memory_kib`: 131072 (128 MiB)
+   - `argon2_threads`: 4
+4. The passphrase-derived key MUST be derived once per `encrypt`/`decrypt` run using the marker file salt.
+5. Each encrypted file MUST contain:
+   - Magic bytes: `REGIMENENC` (ASCII)
+   - Version: 1 byte
+   - Nonce: 12 bytes (for AES-GCM)
+   - Ciphertext: remaining bytes
+6. The plaintext encrypted MUST be the original file bytes.
+7. The encryption MUST use AES-256-GCM.
+8. The AEAD associated data MUST include the original relative path (from wiki root) to detect file swapping.
+9. Each file encryption MUST use a random nonce.
+10. Encryption MUST write to a temp file and rename atomically to avoid partial writes.
 
 ## 6. Interface
 
 ### 6.1. Commands
 
 ```bash
-# Add entries
-reverie add <text> [--date <date>] [--tags <tags>] [--template <name>] [--floating]
-reverie add  # Opens editor
-reverie edit <id>
-reverie delete <id>
+# Add notes
+regimen note add <text> [--date <date>] [--tags <tags>] [--template <name>] [--floating|--daily]
+regimen note add  # Opens editor
+regimen note edit <id>
+regimen note edit --date <date>
+regimen note delete <id>
+regimen note delete --date <date>
 
 # View entries
-reverie today
-reverie week
-reverie month
-reverie show <id>
-reverie list [--limit <n>] [--tags <tags>] [--date <date>] [--range <start> <end>]
+regimen note today
+regimen note week
+regimen note month
+regimen note show <id>
+regimen note show --date <date>
+regimen note list [--limit <n>] [--tags <tags>] [--date <date>] [--range <start> <end>]
 
 # Search
-reverie search <query> [--or] [--tags <tags>] [--after <date>] [--before <date>]
+regimen note search <query> [--or] [--tags <tags>] [--after <date>] [--before <date>]
 
 # Tags
-reverie tags
-reverie tags <tag>
-reverie tag <id> <tags>
-reverie untag <id> <tags>
+regimen note tags
+regimen note tags <tag>
+regimen note tag <id> <tags>
+regimen note untag <id> <tags>
 
 # Special commands
-reverie random [--tag <tag>] [--count <n>]
-reverie standup [--days <n>]
-reverie stats
+regimen note random [--tag <tag>] [--count <n>]
+regimen note report [--days <n>]
+regimen note stats
 
 # Templates
-reverie template list
-reverie template create <name>
+regimen note template list
+regimen note template create <name>
+
+# Encryption (wiki-wide, affects all files)
+regimen encrypt [--passphrase-stdin]
+regimen decrypt [--passphrase-stdin]
 ```
 
 ### 6.2. Flags
 
 **Global Flags:**
-- `--journal <path>`: Override journal directory
+- `--wiki-dir <path>`: Override wiki directory (default: ~/wiki)
 - `--json`: Output in JSON format
 - `--compact`: Single-line summaries
 
@@ -216,6 +322,13 @@ reverie template create <name>
 - `--tags <tag1,tag2>`: Comma-separated tags
 - `--template <name>`: Use template
 - `--floating`: Create floating note
+- `--daily`: Create daily entry (default behavior)
+
+**Show/Edit/Delete Flags:**
+- `--date <YYYY-MM-DD>`: Target a daily note by date
+
+**Encryption Flags:**
+- `--passphrase-stdin`: Read passphrase from stdin instead of interactive prompt
 
 **List/Search Flags:**
 - `--limit <n>`: Maximum entries to show
@@ -226,12 +339,12 @@ reverie template create <name>
 - `--before <date>`: Entries before date
 - `--or`: OR logic for search terms
 
-### 6.3. Entry File Format
+### 6.3. Note File Format
 
-Daily entry (`2026/01/18.md`):
+Daily note (`~/wiki/notes/2026-01-18.md`):
 ```markdown
 ---
-id: a1b2c3d4
+date: 2026-01-18
 created: 2026-01-18T10:30:00Z
 updated: 2026-01-18T14:20:00Z
 tags: [work, meeting, project-x]
@@ -240,18 +353,18 @@ type: daily
 
 # 2026-01-18
 
-## 10:30 - Team Standup
+## 10:30
 
 Discussed the new API endpoint design. John raised concerns about rate limiting.
 
-## 14:00 - Code Review
+## 14:00
 
 Reviewed PR #42. Suggested refactoring the validation logic into a separate function.
 
 #work #progress
 ```
 
-Floating note (`notes/e5f6g7h8.md`):
+Floating note (`~/wiki/notes/e5f6g7h8.md`):
 ```markdown
 ---
 id: e5f6g7h8
@@ -274,7 +387,7 @@ Key considerations:
 
 ### 6.4. Template Format
 
-Template file (`.reverie/templates/meeting.md`):
+Template file (`~/wiki/.templates/meeting.md`):
 ```markdown
 ---
 tags: [meeting]
@@ -299,18 +412,33 @@ tags: [meeting]
 
 ## 7. Behavior
 
-### 7.1. Entry Creation
+### 7.1. Note Creation
 
-1. When creating an entry without text, reverie MUST:
-   - Create a temporary file with frontmatter template
-   - Open it in the user's editor (via `$EDITOR` environment variable)
-   - Parse the result when the editor closes
-   - Create the entry if the content is non-empty
-   - Discard if the user exits without saving or content is empty
+1. When creating a daily note without text (`regimen note add`), the system MUST:
+   - Create the daily note file if missing
+   - Open the daily note file in the user's editor (via `$EDITOR`)
+   - Update the `updated` timestamp when the editor exits successfully
 
-2. Entry IDs MUST be generated as 8-character lowercase hex strings.
+2. When creating a daily note with inline text (`regimen note add <text>`), the system MUST:
+   - Create the daily note file if missing
+   - Append a timestamp heading `## HH:MM` using local time
+   - Append the provided text
+   - Append inline tags for any `--tags` values (as `#tag` tokens)
+   - Merge tags into frontmatter `tags`
+   - Update the `updated` timestamp
 
-3. When using `--date` with a past or future date, the entry MUST be placed in the appropriate YYYY/MM/DD structure.
+3. When creating a floating note (`--floating`), the system MUST:
+   - Generate a new 8-character lowercase hex ID
+   - Write a new `<id>.md` file
+   - If `<text>` is omitted, open a temporary file in the editor and write it out if non-empty
+
+4. Floating note IDs MUST be generated as 8-character lowercase hex strings.
+
+5. When using `--date` with a past or future date, the daily note MUST be placed in the appropriate `YYYY-MM-DD.md` file.
+
+6. Daily notes MUST be stored as `YYYY-MM-DD.md` in the notes directory.
+
+7. Floating notes MUST be stored as `<id>.md` in the notes directory.
 
 ### 7.2. Tag Processing
 
@@ -328,103 +456,148 @@ tags: [meeting]
 4. With `--or`, any matching term is sufficient.
 5. Search results MUST show a context snippet around each match (±50 characters).
 
-### 7.4. Standup Generation
+### 7.4. Template Application
 
-1. Standup MUST aggregate entries from the specified time period.
-2. The report MUST group entries by day.
-3. Only entries with work-related tags (`#work`, `#progress`, `#meeting`) MUST be included by default.
+1. Templates MUST be loaded from `~/wiki/.templates/` (or the configured wiki directory).
+2. `regimen note template list` MUST list template names derived from `*.md` filenames.
+3. `regimen note add --template <name>` MUST resolve the template file and apply it to the target note.
+4. Template placeholders MUST include:
+   - `{{DATE}}` replaced with the target date (YYYY-MM-DD)
+   - `{{TIME}}` replaced with the current local time (HH:MM)
+   - `{{PROMPT:...}}` which MUST prompt the user for a value (stdin)
+5. For daily notes, if the target day file does not exist, `regimen note add --template <name>` MUST create it from the template and open it in the editor.
+6. For daily notes, if the target day file already exists, `regimen note add --template <name>` MUST open the editor with the existing content plus the rendered template appended at the end.
+7. For floating notes, `regimen note add --floating --template <name>` MUST create a new floating note from the rendered template and open it in the editor.
+
+### 7.5. Report Generation
+
+1. The report command MUST aggregate daily notes from the specified time period.
+2. The report MUST group output by day.
+3. Only notes with work-related tags (`#work`, `#progress`, `#meeting`) MUST be included by default.
 4. The output MUST be formatted as:
    ```
-   Standup Report (Last 1 day)
+   Report (Last 1 day)
    
    ## Yesterday (2026-01-17)
    - Completed API endpoint implementation
    - Code review for PR #42
    
    ## Today (2026-01-18)
-   - Team standup meeting
+   - Team meeting
    - Working on authentication middleware
    ```
 
-### 7.5. Random Surfacing
+### 7.6. Random Surfacing
 
 1. Random selection MUST be uniformly distributed across all eligible entries.
 2. When `--tag` is specified, only entries with that tag are eligible.
 3. Random entries MUST be displayed in full (not just previews).
 
+### 7.7. Preview and Listing
+
+1. A "preview" MUST be derived from the first non-empty, non-frontmatter line of the note body.
+2. For daily notes, previews SHOULD skip the top-level `# YYYY-MM-DD` title if present and use the first section content line.
+3. `regimen note week` and `regimen note month` MUST output one line per day in chronological order.
+4. Each line MUST include:
+   - The date
+   - A preview snippet (trimmed to a reasonable terminal width, e.g., ~80 characters)
+5. `regimen note list` MUST output most-recently-updated notes first unless a range/date filter is provided.
+
 ## 8. Error Handling
 
-1. If the Journal Root does not exist, reverie MUST create it on first use.
-2. If `$EDITOR` is not set, reverie MUST default to `vim` on Unix systems and `notepad` on Windows.
-3. If an entry ID prefix is ambiguous (matches multiple entries), reverie MUST list all matches and exit with code 1.
-4. If an entry ID cannot be resolved, reverie MUST exit with code 1 and suggest using `list` or `search`.
-5. If a template does not exist, reverie MUST exit with code 1 and list available templates.
-6. If date parsing fails, reverie MUST exit with code 1 and show the expected format.
+1. If the Notes Directory does not exist, it MUST be created on first use.
+2. If `$EDITOR` is not set, the system MUST default to `vim` on Unix systems and `notepad` on Windows.
+3. If an entry ID prefix is ambiguous (matches multiple entries), the system MUST list all matches and exit with code 1.
+4. If an entry ID cannot be resolved, the system MUST exit with code 1 and suggest using `list` or `search`.
+5. If a template does not exist, the system MUST exit with code 1 and list available templates.
+6. If date parsing fails, the system MUST exit with code 1 and show the expected format.
 7. Malformed frontmatter in existing entries MUST be reported as warnings but not prevent other operations.
+8. If the `.encrypted` marker file exists, any command that reads or writes the wiki directory MUST exit with: "Wiki is encrypted. Run 'regimen decrypt' first."
+9. If `regimen encrypt` is run on an already encrypted wiki, it MUST exit with error.
+10. If `regimen decrypt` is run on an unencrypted wiki, it MUST exit with error.
+11. If decryption fails due to wrong passphrase, the system MUST exit with: "Decryption failed: incorrect passphrase or corrupted file."
 
 ## 9. Examples
 
 ```bash
 # Quick note
-reverie add "Had an idea for improving the login flow"
+regimen note add "Had an idea for improving the login flow"
 
 # Add with tags
-reverie add "Sprint planning meeting" --tags "meeting,work,planning"
+regimen note add "Sprint planning meeting" --tags "meeting,work,planning"
 
 # Open editor for detailed entry
-reverie add
+regimen note add
 
 # Create floating note
-reverie add --floating "Research: Distributed caching strategies"
+regimen note add --floating "Research: Distributed caching strategies"
+
+# Reference a task
+regimen note add "Discussed @task:a1b2c3 in standup today" --tags "work"
 
 # View today's entries
-reverie today
+regimen note today
 
 # View weekly summary
-reverie week
+regimen note week
 
 # Search for entries
-reverie search "API design"
-reverie search "authentication" --after 2026-01-01
+regimen note search "API design"
+regimen note search "authentication" --after 2026-01-01
 
 # Search with tags
-reverie search "meeting" --tags "work"
+regimen note search "meeting" --tags "work"
 
 # List entries with specific tag
-reverie tags meeting
+regimen note tags meeting
 
 # Add tags to existing entry
-reverie tag a1b2c3 "important,follow-up"
+regimen note tag a1b2c3 "important,follow-up"
 
 # Random idea surfacing
-reverie random
-reverie random --tag idea --count 3
+regimen note random
+regimen note random --tag idea --count 3
 
-# Generate standup
-reverie standup
-reverie standup --days 3
+# Generate report
+regimen note report
+regimen note report --days 3
 
 # View statistics
-reverie stats
+regimen note stats
 
 # Use template
-reverie add --template meeting
+regimen note add --template meeting
 
 # Create custom template
-reverie template create retrospective
+regimen note template create retrospective
+
+# Encrypt all `.md` and `.json` files in wiki
+regimen encrypt
+# Or with passphrase from stdin
+echo "my-passphrase" | regimen encrypt --passphrase-stdin
+
+# Decrypt entire wiki
+regimen decrypt
+
+# Commands fail when encrypted
+regimen note add "test"  # Error: Wiki is encrypted. Run 'regimen decrypt' first.
 ```
 
 ## 10. Security Considerations
 
-1. Reverie MUST NOT transmit journal data over the network.
-2. Journal files MAY contain sensitive personal or work information. Documentation MUST warn users to:
-   - Set appropriate file permissions on the Journal Root
-   - Avoid committing sensitive journals to public repositories
-   - Prefer encryption when storing on cloud-synced directories
-3. If encryption is enabled, reverie MUST use authenticated encryption and a modern KDF, and MUST refuse to decrypt when authentication fails.
-4. Entry IDs MUST be generated using a cryptographically secure random source to prevent collisions.
-5. When opening editors, reverie MUST validate `$EDITOR` to prevent command injection.
-6. Template processing MUST NOT execute arbitrary code from template files.
+1. The system MUST NOT transmit wiki data over the network.
+2. Wiki files MAY contain sensitive personal or work information. Documentation MUST warn users to:
+   - Set appropriate file permissions on the wiki directory
+   - Avoid committing sensitive data to public repositories
+   - Use encryption when storing on cloud-synced directories
+3. Encryption MUST use authenticated encryption (AES-256-GCM) and a modern KDF (Argon2id).
+4. Decryption MUST fail completely if authentication tag verification fails.
+5. Passphrases provided via stdin MUST be securely cleared from memory after use.
+6. Interactive passphrase prompts MUST NOT echo characters to the terminal.
+7. Entry IDs MUST be generated using a cryptographically secure random source to prevent collisions.
+8. When opening editors, the system MUST validate `$EDITOR` to prevent command injection.
+9. Template processing MUST NOT execute arbitrary code from template files.
+10. The `.encrypted` marker file prevents accidental operations on encrypted data.
 
 ## 11. Testing Considerations
 
@@ -437,7 +610,7 @@ Test scenarios SHOULD include:
 - Date range filtering
 - ID prefix resolution (unique and ambiguous)
 - Random selection distribution
-- Standup generation with various time ranges
+- Report generation with various time ranges
 - Template processing with prompts
 - Handling malformed frontmatter in existing entries
 - Large journal directories (performance)

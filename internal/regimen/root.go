@@ -12,6 +12,14 @@ var (
 	// Version is set at build time via ldflags
 	Version   = "dev"
 	BuildTime = "unknown"
+
+	// Global wiki directory flag
+	wikiDir string
+)
+
+const (
+	defaultWikiDir = "~/wiki"
+	envWikiDir     = "REGIMEN_WIKI_DIR"
 )
 
 var rootCmd = &cobra.Command{
@@ -32,6 +40,22 @@ Examples:
 
 func init() {
 	rootCmd.Version = fmt.Sprintf("%s (built %s)", Version, BuildTime)
+
+	// Global persistent flag for wiki directory
+	rootCmd.PersistentFlags().StringVar(&wikiDir, "wiki-dir", "",
+		fmt.Sprintf("Wiki directory (default %s, env: %s)", defaultWikiDir, envWikiDir))
+}
+
+// getWikiDir returns the wiki directory to use.
+// Priority: --wiki-dir flag > REGIMEN_WIKI_DIR env > default ~/wiki
+func getWikiDir() string {
+	if wikiDir != "" {
+		return expandPath(wikiDir)
+	}
+	if env := os.Getenv(envWikiDir); env != "" {
+		return expandPath(env)
+	}
+	return expandPath(defaultWikiDir)
 }
 
 // Execute runs the root command.

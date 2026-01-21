@@ -5,128 +5,147 @@
 
 ## Overview
 
-Implement `reverie` as a new standalone executable with hybrid storage: daily entries in `YYYY/MM/DD.md` files and floating notes in `notes/<id>.md`. Uses Markdown with YAML frontmatter for all entries. Provides full-text search, tag-based filtering, random surfacing, and standup generation.
+Implement `regimen note` command group within the existing `regimen` executable with flat file storage: daily entries as `YYYY-MM-DD.md` and floating notes as `<id>.md` in `~/wiki/notes/`. Uses Markdown with YAML frontmatter for all entries. Provides full-text search, tag-based filtering, random surfacing, report generation, and wiki-wide encryption/decryption. Notes can reference tasks using `@task:<id>` syntax.
+
+Daily notes are addressed by date and represent the entire day; multiple `note add <text>` calls append timestamped sections to the same daily file.
 
 ## Prerequisites
 
-- None (new executable, no dependencies on existing sleepless code)
-- Uses existing YAML parsing from gopkg.in/yaml.v3
+- Existing `regimen` executable and command structure
+- YAML parsing from gopkg.in/yaml.v3 (already in use)
+- Cobra CLI framework (already in use)
 
 ## Phases
 
 ### Phase 1: Core Infrastructure
 
-**Goal**: Establish executable structure, entry model, and storage abstraction.
+**Goal**: Establish note command structure, entry model, and storage abstraction.
 
-- [ ] 1.1 Create `cmd/reverie/main.go` entry point
-- [ ] 1.2 Create `internal/reverie/root.go` with Cobra root command
-- [ ] 1.3 Implement `pkg/journal/entry.go` entry model
-- [ ] 1.4 Implement `pkg/markdown/frontmatter.go` for YAML frontmatter parsing
-- [ ] 1.5 Implement `pkg/journal/store.go` storage abstraction
-- [ ] 1.6 Implement ID generation using crypto/rand
-- [ ] 1.7 Add unit tests for entry parsing and serialization
-- [ ] 1.8 Add unit tests for frontmatter parsing
+- [ ] 1.1 Add global `--wiki-dir` flag + env resolution helper
+- [ ] 1.2 Add wiki encryption gate helper (detect `<wikiDir>/.encrypted`)
+- [ ] 1.3 Wire wiki-dir + encryption gate into existing wiki-data command groups (goals, recipes)
+- [ ] 1.4 Create `internal/regimen/note.go` with note command group
+- [ ] 1.5 Implement `pkg/notes/entry.go` entry model
+- [ ] 1.6 Update `pkg/markdown/frontmatter.go` to support note metadata (if needed)
+- [ ] 1.7 Implement `pkg/notes/store.go` storage abstraction with wiki directory configuration
+- [ ] 1.8 Implement ID generation using crypto/rand
+- [ ] 1.9 Implement `.encrypted` marker file check in notes store
+- [ ] 1.10 Add unit tests for entry parsing and serialization
+- [ ] 1.11 Add unit tests for frontmatter parsing
 
-**Milestone**: Can parse and serialize entries with frontmatter.
+**Milestone**: Wiki directory resolution exists; wiki-data commands are blocked when encrypted; can parse/serialize notes with frontmatter.
 
 ### Phase 2: Entry Creation and Editing
 
-**Goal**: Implement add, edit, and delete commands.
+**Goal**: Implement add, edit, and delete commands with flat file structure.
 
-- [ ] 2.1 Implement `pkg/journal/daily.go` for daily file operations
-- [ ] 2.2 Implement `pkg/journal/floating.go` for floating note operations
-- [ ] 2.3 Implement `reverie add <text>` command (inline text)
-- [ ] 2.4 Implement `reverie add` (editor mode)
-- [ ] 2.5 Implement `--date`, `--tags`, `--floating` flags
-- [ ] 2.6 Implement `reverie edit <id>` command
-- [ ] 2.7 Implement `reverie delete <id>` command
-- [ ] 2.8 Implement ID prefix resolution
-- [ ] 2.9 Implement inline tag extraction from content
-- [ ] 2.10 Add unit tests for daily file operations
-- [ ] 2.11 Add unit tests for floating note operations
-- [ ] 2.12 Add integration tests for add/edit/delete workflows
+- [ ] 2.1 Implement `pkg/notes/daily.go` for daily file operations (YYYY-MM-DD.md)
+- [ ] 2.2 Implement `pkg/notes/floating.go` for floating note operations (<id>.md)
+- [ ] 2.3 Implement `regimen note add <text>` command (daily append with timestamp heading)
+- [ ] 2.4 Implement `regimen note add` (editor mode; opens daily note)
+- [ ] 2.5 Implement `--date`, `--tags`, `--floating`, `--daily` flags
+- [ ] 2.6 Implement `regimen note edit <id>` command (floating)
+- [ ] 2.7 Implement `regimen note edit --date <date>` command (daily)
+- [ ] 2.8 Implement `regimen note delete <id>` command (floating)
+- [ ] 2.9 Implement `regimen note delete --date <date>` command (daily)
+- [ ] 2.10 Implement ID prefix resolution (floating notes)
+- [ ] 2.11 Implement inline tag extraction from content
+- [ ] 2.12 Implement `@task:<id>` reference parsing in `pkg/notes/taskref.go`
+- [ ] 2.13 Add unit tests for daily file operations
+- [ ] 2.14 Add unit tests for floating note operations
+- [ ] 2.15 Add unit tests for task reference parsing
+- [ ] 2.16 Add integration tests for add/edit/delete workflows
 
-**Milestone**: `reverie add "thought"` creates entry; `reverie add --floating` creates floating note; `reverie edit <id>` opens editor.
+**Milestone**: Daily add appends timestamp blocks; floating notes have stable IDs; edit/delete support both modes.
 
 ### Phase 3: Viewing Commands
 
 **Goal**: Implement commands for viewing entries.
 
-- [ ] 3.1 Implement `reverie today` command
-- [ ] 3.2 Implement `reverie show <id>` command
-- [ ] 3.3 Implement `reverie list` command with preview
+- [ ] 3.1 Implement `regimen note today` command
+- [ ] 3.2 Implement `regimen note show <id>` (floating) and `regimen note show --date` (daily)
+- [ ] 3.3 Implement `regimen note list` command with preview
 - [ ] 3.4 Implement `--limit`, `--tags`, `--date`, `--range` flags
-- [ ] 3.5 Implement `reverie week` command
-- [ ] 3.6 Implement `reverie month` command
+- [ ] 3.5 Implement `regimen note week` command
+- [ ] 3.6 Implement `regimen note month` command
 - [ ] 3.7 Implement `--json` and `--compact` output formats
 - [ ] 3.8 Add unit tests for date range calculations
 - [ ] 3.9 Add integration tests for viewing commands
 
-**Milestone**: `reverie today` shows today's entries; `reverie list --tags work` filters by tag; `reverie week` shows weekly summary.
+**Milestone**: `regimen note today` shows today's entries; `regimen note list --tags work` filters by tag; `regimen note week` shows weekly summary.
 
 ### Phase 4: Search and Tags
 
 **Goal**: Implement full-text search and tag management.
 
-- [ ] 4.1 Implement `pkg/journal/index.go` search indexing
-- [ ] 4.2 Implement `reverie search <query>` command
+- [ ] 4.1 Implement `pkg/notes/index.go` search indexing
+- [ ] 4.2 Implement `regimen note search <query>` command
 - [ ] 4.3 Implement `--or`, `--tags`, `--after`, `--before` flags
 - [ ] 4.4 Implement context snippets in search results
-- [ ] 4.5 Implement `reverie tags` command (list all tags)
-- [ ] 4.6 Implement `reverie tags <tag>` command (entries with tag)
-- [ ] 4.7 Implement `reverie tag <id> <tags>` command
-- [ ] 4.8 Implement `reverie untag <id> <tags>` command
-- [ ] 4.9 Add unit tests for search matching
-- [ ] 4.10 Add unit tests for tag operations
-- [ ] 4.11 Add integration tests for search
+- [ ] 4.5 Implement `regimen note tags` command (list all tags)
+- [ ] 4.6 Implement `regimen note tags <tag>` command (entries with tag)
+- [ ] 4.7 Implement `regimen note tag <id> <tags>` command
+- [ ] 4.8 Implement `regimen note untag <id> <tags>` command
+- [ ] 4.9 Add task reference search support
+- [ ] 4.10 Add unit tests for search matching
+- [ ] 4.11 Add unit tests for tag operations
+- [ ] 4.12 Add integration tests for search
 
-**Milestone**: `reverie search "API"` finds matching entries with context; `reverie tags` lists all tags with counts.
+**Milestone**: `regimen note search "API"` finds matching entries with context; `regimen note tags` lists all tags with counts; can search for `@task:<id>` references.
 
 ### Phase 5: Special Commands
 
-**Goal**: Implement random surfacing, standup, and statistics.
+**Goal**: Implement random surfacing, report generation, and statistics.
 
-- [ ] 5.1 Implement `reverie random` command
+- [ ] 5.1 Implement `regimen note random` command
 - [ ] 5.2 Implement `--tag` and `--count` flags for random
-- [ ] 5.3 Implement `reverie standup` command
-- [ ] 5.4 Implement `--days` flag for standup
-- [ ] 5.5 Implement work-tag filtering for standup
-- [ ] 5.6 Implement `reverie stats` command
+- [ ] 5.3 Implement `regimen note report` command
+- [ ] 5.4 Implement `--days` flag for report
+- [ ] 5.5 Implement work-tag filtering for report
+- [ ] 5.6 Implement `regimen note stats` command
 - [ ] 5.7 Calculate entry counts, tag distribution, streaks
 - [ ] 5.8 Add unit tests for random selection
-- [ ] 5.9 Add unit tests for standup generation
+- [ ] 5.9 Add unit tests for report generation
 - [ ] 5.10 Add unit tests for statistics calculation
 
-**Milestone**: `reverie random` surfaces a random entry; `reverie standup` generates report from recent work entries; `reverie stats` shows journal statistics.
+**Milestone**: `regimen note random` surfaces a random entry; `regimen note report` generates report from recent work entries; `regimen note stats` shows note statistics.
 
 ### Phase 6: Encryption
 
-**Goal**: Support optional at-rest encryption for journal entries (transparent to commands).
+**Goal**: Implement wiki-wide encryption/decryption commands.
 
-- [ ] 6.1 Add `pkg/crypto/journal.go` with encrypt/decrypt helpers (AEAD + KDF)
-- [ ] 6.2 Define encrypted file format (magic header + version + salt + nonce + ciphertext)
-- [ ] 6.3 Support `REVERIE_PASSPHRASE` and `--passphrase-stdin` in root command
-- [ ] 6.4 Update journal store read/write paths to auto-detect and decrypt/encrypt
-- [ ] 6.5 Ensure mixed plaintext/encrypted journals work seamlessly
-- [ ] 6.6 Add unit tests for crypto format round-trips and auth failure behavior
-- [ ] 6.7 Add integration tests for add/show/search on encrypted journals
+- [ ] 6.1 Add `pkg/crypto/wiki.go` with encrypt/decrypt functions (AEAD + KDF)
+- [ ] 6.2 Define encrypted file format (REGIMENENC header + nonce + ciphertext)
+- [ ] 6.3 Define `.encrypted` marker JSON (salt + argon2 params)
+- [ ] 6.4 Implement `.encrypted` marker file creation/removal
+- [ ] 6.5 Implement `regimen encrypt` command with passphrase handling
+- [ ] 6.6 Implement `regimen decrypt` command with passphrase handling
+- [ ] 6.7 Support `--passphrase-stdin` flag and interactive prompt (confirm on encrypt)
+- [ ] 6.8 Encrypt eligible file types: `.md` and `.json` (skip `.git/`, skip symlinks)
+- [ ] 6.9 Best-effort operation with per-file errors and summary
+- [ ] 6.10 Add encryption state checks to all note/task commands
+- [ ] 6.11 Ensure commands fail with helpful error when wiki is encrypted
+- [ ] 6.12 Add unit tests for crypto format round-trips
+- [ ] 6.13 Add unit tests for authentication failure behavior
+- [ ] 6.14 Add integration tests for encrypt/decrypt workflows
+- [ ] 6.15 Add tests for command blocking when encrypted
 
-**Milestone**: Normal commands work unchanged with encrypted journals when passphrase is provided.
+**Milestone**: `regimen encrypt` encrypts all .md files; `regimen decrypt` decrypts them; all commands block when `.encrypted` marker exists.
 
 ### Phase 7: Templates
 
 **Goal**: Implement template system for structured entries.
 
-- [ ] 7.1 Create template storage directory (`~/.config/reverie/templates/`)
-- [ ] 7.2 Implement `reverie template list` command
-- [ ] 7.3 Implement `reverie template create <name>` command
-- [ ] 7.4 Implement `reverie add --template <name>` integration
+- [ ] 7.1 Create template storage directory (`~/wiki/.templates/`)
+- [ ] 7.2 Implement `regimen note template list` command
+- [ ] 7.3 Implement `regimen note template create <name>` command
+- [ ] 7.4 Implement `regimen note add --template <name>` integration
 - [ ] 7.5 Implement template placeholders (`{{DATE}}`, `{{PROMPT:...}}`)
-- [ ] 7.6 Create built-in templates: standup, meeting, reflection, idea
+- [ ] 7.6 Create built-in templates: meeting, reflection, idea, report
 - [ ] 7.7 Add unit tests for template parsing
 - [ ] 7.8 Add integration tests for template usage
 
-**Milestone**: `reverie add --template meeting` creates entry from meeting template with prompts.
+**Milestone**: `regimen note add --template meeting` creates entry from meeting template with prompts.
 
 ## Testing Plan
 
@@ -134,14 +153,18 @@ Implement `reverie` as a new standalone executable with hybrid storage: daily en
 
 - Entry parsing: valid frontmatter, missing fields, malformed YAML
 - Entry serialization: round-trip consistency
-- Daily file operations: append entry, parse multiple entries, handle empty file
+- Daily file operations: create/read/update/delete entry, handle missing file
 - Floating note operations: create, read, update, delete
+- Task reference parsing: extract @task:<id>, multiple references, invalid formats
 - ID generation: uniqueness, format validation
 - ID prefix resolution: unique match, ambiguous match, no match
 - Tag extraction: inline tags, frontmatter tags, deduplication
 - Search matching: case-insensitivity, multiple terms, AND/OR logic
 - Date calculations: today, week boundaries, month boundaries
-- Standup generation: filtering by tags, grouping by day
+- Report generation: filtering by tags, grouping by day
+- Encryption/decryption: full wiki encrypt/decrypt, marker file, passphrase handling
+- Command blocking: all commands fail when .encrypted marker exists
+- Template processing: placeholder substitution, prompts
 - Random selection: distribution, tag filtering
 - Statistics: counting, streak calculation
 
@@ -149,19 +172,26 @@ Implement `reverie` as a new standalone executable with hybrid storage: daily en
 
 - Full add workflow: add → verify file created → verify content
 - Edit workflow: add → edit → verify changes persisted
-- Delete workflow: add → delete → verify file removed/updated
+- Delete workflow: add → delete → verify file removed
 - Search workflow: add multiple → search → verify results
-- Daily file accumulation: add multiple entries same day → verify single file
-- Cross-day entries: add entries across days → verify file structure
+- Cross-day entries: add entries across days → verify file structure (one file per day)
 - Editor integration: mock editor, verify entry parsing
+- Encryption workflow: encrypt → verify .enc files → decrypt → verify .md files
+- Encrypted state blocking: encrypt → try note add → verify error message
 
 ## Rollback Plan
 
-- Remove `cmd/reverie/`, `internal/reverie/`, `pkg/journal/`, `pkg/markdown/`
-- Remove `reverie` from Makefile build targets
+- Remove note command files from `internal/regimen/note*.go`
+- Remove `pkg/notes/` directory
+- Remove encryption command files `internal/regimen/encrypt.go` and `decrypt.go`
+- Remove `pkg/crypto/wiki.go` if not used elsewhere
+- Remove template directory `~/wiki/.templates/` (user data - warn first)
 
 ## Open Questions
 
 - Should templates support conditional sections?
-- Should `reverie import` support jrnl format for migration?
-- Should there be a `reverie export` command for backup/sharing?
+- Should there be a `regimen note import` command to import from jrnl or other tools?
+- Should there be a `regimen note export` command for backup/sharing?
+- When should `@task:<id>` become bidirectional (show notes referencing a task)?
+- Should encryption support external tools (age, gpg) or custom format only?
+- Should there be a `regimen note graph` command to visualize task references?
