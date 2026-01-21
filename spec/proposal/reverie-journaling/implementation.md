@@ -82,7 +82,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 4.2 Implement `regimen note search <query>` command
 - [x] 4.3 Implement `--or`, `--tags`, `--after`, `--before` flags
 - [x] 4.4 Implement context snippets in search results
-- [ ] 4.5 Implement `regimen note tags` command (list all tags)
+- [x] 4.5 Implement `regimen note tags` command (list all tags)
 - [ ] 4.6 Implement `regimen note tags <tag>` command (entries with tag)
 - [ ] 4.7 Implement `regimen note tag <id> <tags>` command
 - [ ] 4.8 Implement `regimen note untag <id> <tags>` command
