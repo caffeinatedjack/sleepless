@@ -25,7 +25,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 1.2 Add wiki encryption gate helper (detect `<wikiDir>/.encrypted`)
 - [x] 1.3 Wire wiki-dir + encryption gate into existing wiki-data command groups (goals, recipes)
 - [x] 1.4 Create `internal/regimen/note.go` with note command group
-- [ ] 1.5 Implement `pkg/notes/entry.go` entry model
+- [x] 1.5 Implement `pkg/notes/entry.go` entry model
 - [ ] 1.6 Update `pkg/markdown/frontmatter.go` to support note metadata (if needed)
 - [ ] 1.7 Implement `pkg/notes/store.go` storage abstraction with wiki directory configuration
 - [ ] 1.8 Implement ID generation using crypto/rand
