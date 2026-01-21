@@ -42,7 +42,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 2.1 Implement `pkg/notes/daily.go` for daily file operations (YYYY-MM-DD.md)
 - [x] 2.2 Implement `pkg/notes/floating.go` for floating note operations (<id>.md)
 - [x] 2.3 Implement `regimen note add <text>` command (daily append with timestamp heading)
-- [ ] 2.4 Implement `regimen note add` (editor mode; opens daily note)
+- [x] 2.4 Implement `regimen note add` (editor mode; opens daily note)
 - [ ] 2.5 Implement `--date`, `--tags`, `--floating`, `--daily` flags
 - [ ] 2.6 Implement `regimen note edit <id>` command (floating)
 - [ ] 2.7 Implement `regimen note edit --date <date>` command (daily)
