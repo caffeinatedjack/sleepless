@@ -31,7 +31,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 1.8 Implement ID generation using crypto/rand
 - [x] 1.9 Implement `.encrypted` marker file check in notes store
 - [x] 1.10 Add unit tests for entry parsing and serialization
-- [ ] 1.11 Add unit tests for frontmatter parsing
+- [x] 1.11 Add unit tests for frontmatter parsing
 
 **Milestone**: Wiki directory resolution exists; wiki-data commands are blocked when encrypted; can parse/serialize notes with frontmatter.
 
