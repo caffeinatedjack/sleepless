@@ -136,7 +136,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 
 **Goal**: Implement template system for structured entries.
 
-- [ ] 7.1 Create template storage directory (`~/wiki/.templates/`)
+- [x] 7.1 Create template storage directory (`~/wiki/.templates/`)
 - [ ] 7.2 Implement `regimen note template list` command
 - [ ] 7.3 Implement `regimen note template create <name>` command
 - [ ] 7.4 Implement `regimen note add --template <name>` integration
