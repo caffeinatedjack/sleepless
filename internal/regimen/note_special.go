@@ -122,7 +122,7 @@ func runNoteRandom(cmd *cobra.Command, args []string) error {
 
 	for i := 0; i < count; i++ {
 		if i > 0 {
-			fmt.Println("\n---\n")
+			fmt.Println("\n---")
 		}
 		displayNote(noteList[i])
 	}

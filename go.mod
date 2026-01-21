@@ -1,12 +1,14 @@
 module gitlab.com/caffeinatedjack/sleepless
 
-go 1.21
+go 1.24.0
 
 require (
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/spf13/cobra v1.8.0
+	golang.org/x/crypto v0.47.0
+	golang.org/x/term v0.39.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -20,5 +22,5 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.4.6 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 )
