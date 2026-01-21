@@ -121,7 +121,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 6.5 Implement `regimen encrypt` command with passphrase handling
 - [x] 6.6 Implement `regimen decrypt` command with passphrase handling
 - [x] 6.7 Support `--passphrase-stdin` flag and interactive prompt (confirm on encrypt)
-- [ ] 6.8 Encrypt eligible file types: `.md` and `.json` (skip `.git/`, skip symlinks)
+- [x] 6.8 Encrypt eligible file types: `.md` and `.json` (skip `.git/`, skip symlinks)
 - [ ] 6.9 Best-effort operation with per-file errors and summary
 - [ ] 6.10 Add encryption state checks to all note/task commands
 - [ ] 6.11 Ensure commands fail with helpful error when wiki is encrypted
