@@ -18,7 +18,7 @@ Implement a new `nightwatch guard` Cobra command group that scans staged snapsho
 **Goal**: Provide reusable scanning logic and baseline suppression.
 
 - [x] Add `pkg/guard` scanner that returns file/line/column and counts.
-- [ ] Add baseline JSON load/save and fingerprint suppression.
+- [x] Add baseline JSON load/save and fingerprint suppression.
 - [ ] Add unit tests for fingerprinting and baseline behavior.
 
 **Milestone**: `go test ./...` includes new guard tests and passes.
