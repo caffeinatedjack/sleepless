@@ -259,3 +259,8 @@ func isHexString(s string) bool {
 	}
 	return true
 }
+
+// LoadNote loads a note from a file path (helper for internal use).
+func (s *Store) LoadNote(path string) (*Note, error) {
+	return s.loadNote(path)
+}
