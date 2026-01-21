@@ -4,6 +4,44 @@ A collection of personal productivity tools for managing your digital life throu
 
 ## Executables
 
+### nightwatch
+
+Security and development utilities for offline, scriptable workflows.
+
+**Features:**
+- 🔍 **Guard**: Scan code for secrets and PII (pre-commit hooks, CI)
+- 🔒 **Redact**: PII/secret redaction in logs and files
+- 🔑 **Password**: Secure password and passphrase generation
+- 🔐 **JWT**: JWT token operations (decode, verify)
+- 🎭 **Fake**: Fake data generation for testing
+
+**Installation:**
+```bash
+go build -o nightwatch ./cmd/nightwatch
+```
+
+**Basic Usage:**
+```bash
+# Scan staged files for secrets (pre-commit)
+nightwatch guard staged
+
+# Scan with JSON output for CI
+nightwatch guard staged --json
+
+# Create baseline to suppress known findings
+nightwatch guard baseline staged --out .nightwatch-baseline.json
+
+# Scan with baseline
+nightwatch guard staged --baseline .nightwatch-baseline.json
+
+# Redact secrets from logs
+nightwatch redact "Contact john@example.com at 555-1234"
+
+# Generate passwords
+nightwatch password generate --length 24
+nightwatch password phrase --words 6
+```
+
 ### regimen
 
 Personal knowledge management and productivity CLI for your Vim wiki.
@@ -195,7 +233,135 @@ Display themed ASCII art banners.
 regimen banner
 ```
 
-## Global Flags
+---
+
+## nightwatch Commands
+
+### `nightwatch guard` - Secret and PII Scanning
+
+Scan local code for likely secrets and PII, designed for offline use in pre-commit hooks and CI pipelines.
+
+**Output is safe-by-default**: Raw secret values are NEVER printed.
+
+**Subcommands:**
+- `staged` - Scan staged files (git)
+- `worktree` - Scan working tree files (git)
+- `path <path>` - Scan a file or directory
+- `baseline [target]` - Generate baseline file from scan results
+
+**Flags:**
+- `--json` - Output JSON instead of human-readable format
+- `--baseline <path>` - Suppress known findings using baseline file
+
+**Exit codes:**
+- `0` - No findings detected
+- `1` - Findings detected or error occurred
+
+**Examples:**
+```bash
+# Pre-commit hook: scan staged files
+nightwatch guard staged
+
+# CI pipeline: scan with JSON output
+nightwatch guard staged --json
+
+# Create baseline to suppress existing findings
+nightwatch guard baseline staged --out .nightwatch-baseline.json
+
+# Scan with baseline suppression
+nightwatch guard staged --baseline .nightwatch-baseline.json
+
+# Scan a specific directory
+nightwatch guard path src/
+
+# Scan current working tree
+nightwatch guard worktree
+```
+
+**Detected patterns:**
+- EMAIL - Email addresses
+- PHONE - Phone numbers
+- IP - IPv4 and IPv6 addresses
+- CREDIT_CARD - Credit card numbers
+- UUID - UUIDs
+- NAME - Personal names (when enabled)
+
+**Baseline workflow:**
+```bash
+# 1. Create baseline from current state
+nightwatch guard baseline staged --out .nightwatch-baseline.json
+
+# 2. Commit baseline to repository
+git add .nightwatch-baseline.json
+git commit -m "Add security baseline"
+
+# 3. Use in pre-commit hook or CI
+nightwatch guard staged --baseline .nightwatch-baseline.json
+```
+
+### `nightwatch redact` - PII and Secret Redaction
+
+Redact personally identifiable information and secrets from text, files, or logs.
+
+**Subcommands:**
+- `redact [text]` - Redact text (or from stdin)
+- `file <path>` - Redact a file
+- `dir <path>` - Redact files in a directory
+
+**Examples:**
+```bash
+# Redact inline text
+nightwatch redact "Contact john@example.com or call 555-1234"
+
+# Redact from stdin
+cat server.log | nightwatch redact stdin
+
+# Check file for PII without modifying
+nightwatch redact check file server.log
+```
+
+### `nightwatch password` - Password Generation
+
+Generate secure passwords and passphrases.
+
+**Examples:**
+```bash
+# Generate random password
+nightwatch password generate --length 24
+
+# Generate memorable passphrase
+nightwatch password phrase --words 6
+```
+
+### `nightwatch jwt` - JWT Operations
+
+Decode and verify JWT tokens.
+
+**Examples:**
+```bash
+# Decode JWT token
+nightwatch jwt decode <token>
+
+# Verify JWT signature
+nightwatch jwt verify <token> --secret <key>
+```
+
+### `nightwatch fake` - Fake Data Generation
+
+Generate fake data for testing purposes.
+
+**Examples:**
+```bash
+# Generate fake emails
+nightwatch fake email --count 5
+
+# Generate fake names
+nightwatch fake name --count 10
+```
+
+---
+
+## Global Flags (regimen)
 
 - `--wiki-dir <path>` - Specify wiki directory (default: `~/wiki`, env: `REGIMEN_WIKI_DIR`)
 - `-h, --help` - Show help
