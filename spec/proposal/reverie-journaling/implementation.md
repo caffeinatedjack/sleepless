@@ -21,7 +21,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 
 **Goal**: Establish note command structure, entry model, and storage abstraction.
 
-- [ ] 1.1 Add global `--wiki-dir` flag + env resolution helper
+- [x] 1.1 Add global `--wiki-dir` flag + env resolution helper
 - [ ] 1.2 Add wiki encryption gate helper (detect `<wikiDir>/.encrypted`)
 - [ ] 1.3 Wire wiki-dir + encryption gate into existing wiki-data command groups (goals, recipes)
 - [ ] 1.4 Create `internal/regimen/note.go` with note command group

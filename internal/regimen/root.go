@@ -2,8 +2,10 @@
 package regimen
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -20,6 +22,8 @@ var (
 const (
 	defaultWikiDir = "~/wiki"
 	envWikiDir     = "REGIMEN_WIKI_DIR"
+
+	encryptedMarkerFile = ".encrypted"
 )
 
 var rootCmd = &cobra.Command{
@@ -56,6 +60,19 @@ func getWikiDir() string {
 		return expandPath(env)
 	}
 	return expandPath(defaultWikiDir)
+}
+
+// ErrWikiEncrypted is returned when attempting to access an encrypted wiki.
+var ErrWikiEncrypted = errors.New("wiki is encrypted. Run 'regimen decrypt' first")
+
+// checkWikiEncrypted returns an error if the wiki directory is encrypted.
+// Commands that read/write wiki data MUST call this function.
+func checkWikiEncrypted(wikiDir string) error {
+	markerPath := filepath.Join(wikiDir, encryptedMarkerFile)
+	if _, err := os.Stat(markerPath); err == nil {
+		return ErrWikiEncrypted
+	}
+	return nil
 }
 
 // Execute runs the root command.
