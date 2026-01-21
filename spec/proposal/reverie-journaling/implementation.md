@@ -88,7 +88,7 @@ Daily notes are addressed by date and represent the entire day; multiple `note a
 - [x] 4.8 Implement `regimen note untag <id> <tags>` command
 - [x] 4.9 Add task reference search support
 - [x] 4.10 Add unit tests for search matching
-- [ ] 4.11 Add unit tests for tag operations
+- [x] 4.11 Add unit tests for tag operations
 - [ ] 4.12 Add integration tests for search
 
 **Milestone**: `regimen note search "API"` finds matching entries with context; `regimen note tags` lists all tags with counts; can search for `@task:<id>` references.
